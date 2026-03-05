@@ -129,7 +129,7 @@ export default function SatelliteTable({ satellites, onSelect, selectedId }) {
           <tbody>
             {sorted.map(sat => {
               const dotClass = STATE_DOT_CLASS[sat.state] || 'dotNew';
-              const stateKey = Object.entries(STATES).find(([, v]) => v === sat.state)?.[0]?.toLowerCase() || '';
+              const stateKey = Object.entries(STATES).find(([, v]) => v === sat.state)?.[0]?.toLowerCase() || sat.state;
 
               return (
                 <tr
