@@ -1,0 +1,160 @@
+.panel {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.toolbar {
+  display: flex;
+  gap: 20px;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
+  flex-shrink: 0;
+}
+
+.configSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.configRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.configRow label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  min-width: 100px;
+  text-align: right;
+}
+
+.configInput {
+  flex: 1;
+  max-width: 360px;
+}
+
+.runInput {
+  flex: 1;
+  max-width: 200px;
+}
+
+.seqLabel {
+  min-width: auto !important;
+  margin-left: 8px;
+}
+
+.seqInput {
+  width: 64px;
+}
+
+.btn {
+  padding: 5px 14px;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: background 0.15s;
+}
+
+.btn:hover {
+  background: var(--bg-hover);
+}
+
+.controlButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 220px;
+}
+
+.btnRow {
+  display: flex;
+  gap: 4px;
+}
+
+.cmdBtn {
+  flex: 1;
+  padding: 7px 12px;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  transition: all 0.15s;
+  border: 1px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.cmdBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.cmdBtn::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.initBtn {
+  background: var(--bg-tertiary);
+  color: var(--state-init);
+  border-color: var(--border);
+}
+.initBtn:not(:disabled):hover { background: var(--bg-hover); }
+.initBtn::before { background: var(--state-init); }
+
+.shutdownBtn {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border-color: var(--border);
+}
+.shutdownBtn:hover { background: var(--bg-hover); }
+.shutdownBtn::before { background: var(--text-muted); }
+
+.launchBtn {
+  background: var(--bg-tertiary);
+  color: var(--state-orbit);
+  border-color: var(--border);
+}
+.launchBtn:not(:disabled):hover { background: var(--bg-hover); }
+.launchBtn::before { background: var(--state-orbit); }
+
+.landBtn {
+  background: var(--bg-tertiary);
+  color: var(--state-init);
+  border-color: var(--border);
+}
+.landBtn:not(:disabled):hover { background: var(--bg-hover); }
+.landBtn::before { background: var(--state-init); }
+
+.startBtn {
+  background: var(--bg-tertiary);
+  color: var(--state-run);
+  border-color: var(--border);
+}
+.startBtn:not(:disabled):hover { background: var(--bg-hover); }
+.startBtn::before { background: var(--state-run); }
+
+.stopBtn {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border-color: var(--border);
+}
+.stopBtn:not(:disabled):hover { background: var(--bg-hover); }
+.stopBtn::before { background: var(--text-muted); }

@@ -1,0 +1,171 @@
+.container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tableHeader {
+  padding: 10px 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+
+.tableWrap {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.table th {
+  background: var(--bg-tertiary);
+  padding: 8px 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  user-select: none;
+}
+
+.sortable {
+  cursor: pointer;
+}
+
+.sortable:hover {
+  color: var(--text-primary);
+}
+
+.sortArrow {
+  font-size: 0.65rem;
+}
+
+.table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.row {
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.row:hover {
+  background: var(--bg-hover);
+}
+
+.row.selected {
+  background: var(--bg-active);
+}
+
+.stateText {
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+.new { color: var(--state-new); }
+.init { color: var(--state-init); }
+.orbit { color: var(--state-orbit); }
+.run { color: var(--state-run); }
+.error { color: var(--state-error); }
+.safe { color: var(--state-safe); }
+
+.msgCell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.msgDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dotNew { background: var(--state-new); }
+.dotInit { background: var(--state-init); }
+.dotOrbit { background: var(--state-orbit); }
+.dotRun { background: var(--state-run); }
+.dotError { background: var(--state-error); }
+.dotSafe { background: var(--state-safe); }
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+/* Context menu */
+.menuBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+}
+
+.contextMenu {
+  position: fixed;
+  z-index: 100;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 4px 0;
+  min-width: 180px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 14px;
+  background: none;
+  color: var(--text-primary);
+  text-align: left;
+  font-size: 0.8rem;
+  transition: background 0.1s;
+}
+
+.menuItem:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+
+.menuDisabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.menuSeparator {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 8px;
+}
+
+.menuDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.menuDot[data-cmd="initialize"] { background: var(--state-init); }
+.menuDot[data-cmd="launch"] { background: var(--state-orbit); }
+.menuDot[data-cmd="land"] { background: var(--state-init); }
+.menuDot[data-cmd="start"] { background: var(--state-run); }
+.menuDot[data-cmd="stop"] { background: var(--text-muted); }
+.menuDot[data-cmd="shutdown"] { background: var(--text-muted); }
