@@ -1,10 +1,7 @@
-// Generates realistic log messages mimicking what Observatory would show
-
 const LOG_LEVELS = ['TRACE', 'DEBUG', 'INFO', 'STATUS', 'WARNING', 'CRITICAL'];
 
 const TOPICS = ['CSCP', 'CHIRP', 'DATA', 'FSM', 'HEARTBEAT', 'CONFIG', 'SYSTEM'];
 
-// Pool of realistic messages for each topic
 const MESSAGE_TEMPLATES = {
   CSCP: [
     'Received command request from controller',
@@ -27,7 +24,7 @@ const MESSAGE_TEMPLATES = {
     'Event rate: {rate} Hz',
   ],
   FSM: [
-    'State transition: {from} → {to}',
+    'State transition: {from} -> {to}',
     'Transition completed in {ms}ms',
     'All conditions for transition met',
     'Waiting for dependent satellites',
@@ -83,7 +80,7 @@ export function generateLogEntry(satellites) {
   const templates = MESSAGE_TEMPLATES[topic];
   const message = fillTemplate(pickRandom(templates));
 
-  // Weight towards INFO/STATUS, less WARNING/CRITICAL
+  // weighted distribution
   let level;
   const roll = Math.random();
   if (roll < 0.05) level = 'CRITICAL';

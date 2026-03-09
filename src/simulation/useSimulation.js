@@ -24,12 +24,12 @@ export function useSimulation() {
   useEffect(() => { subLevelRef.current = subLevel; }, [subLevel]);
 
   useEffect(() => {
-    // Heartbeat ticker — every 3s like real Constellation
+    // Heartbeat ticker - every 3s like real Constellation
     const heartbeatInterval = setInterval(() => {
       dispatch(updateHeartbeats());
     }, 3000);
 
-    // Log generator — random interval, faster when running
+    // Log generator - random interval, faster when running
     let logTimeout;
     const scheduleLog = () => {
       const delay = isRunningRef.current
@@ -47,13 +47,13 @@ export function useSimulation() {
     };
     scheduleLog();
 
-    // Telemetry ticker — every 2s
+    // Telemetry ticker - every 2s
     const telemetryInterval = setInterval(() => {
       const point = generateTelemetryTick(isRunningRef.current);
       dispatch(addTelemetryPoint(point));
     }, 2000);
 
-    // Run timer — every second
+    // Run timer - every second
     const timerInterval = setInterval(() => {
       dispatch(tickTimer());
     }, 1000);

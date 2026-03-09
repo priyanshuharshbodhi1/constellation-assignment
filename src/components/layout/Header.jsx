@@ -9,7 +9,6 @@ function formatDuration(seconds) {
   return `${h}:${m}:${s}`;
 }
 
-// Derive the overall constellation state from individual satellite states
 function deriveGlobalState(satellites) {
   if (satellites.length === 0) return STATES.NEW;
   const states = satellites.map(s => s.state);
@@ -73,13 +72,19 @@ export default function Header({ theme, onToggleTheme }) {
         </div>
       </div>
 
-      <button
-        className={styles.themeToggle}
-        onClick={onToggleTheme}
-        title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-      >
-        {theme === 'dark' ? '☀' : '☾'}
-      </button>
+      <div className={styles.headerRight}>
+        <div className={styles.controllers} title="Connected controllers">
+          <span className={styles.controllerDot} />
+          2 controllers
+        </div>
+        <button
+          className={styles.themeToggle}
+          onClick={onToggleTheme}
+          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+        >
+          {theme === 'dark' ? '☀' : '☾'}
+        </button>
+      </div>
     </header>
   );
 }

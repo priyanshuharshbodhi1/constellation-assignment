@@ -13,7 +13,6 @@ export default function App() {
     return localStorage.getItem('constellation-theme') || 'dark';
   });
 
-  // Start the simulation (heartbeats, logs, telemetry)
   useSimulation();
 
   useEffect(() => {

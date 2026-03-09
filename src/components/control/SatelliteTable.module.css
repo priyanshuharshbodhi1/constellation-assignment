@@ -85,6 +85,12 @@
 .safe { color: var(--state-safe); }
 .initializing, .launching, .starting, .stopping, .landing {
   color: var(--text-secondary);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 
 .msgCell {

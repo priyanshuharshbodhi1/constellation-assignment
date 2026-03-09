@@ -59,7 +59,6 @@ export default function TelemetryPanel() {
 
   return (
     <div className={styles.panel}>
-      {/* Summary cards */}
       <div className={styles.summaryRow}>
         <div className={styles.metric}>
           <span className={styles.metricLabel}>Event Rate</span>

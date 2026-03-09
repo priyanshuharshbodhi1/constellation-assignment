@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   sendGlobalCommand,
@@ -11,9 +11,33 @@ import { startRun, stopRun, setRunIdentifier, setSequence } from '../../store/ru
 import { STATES, ALLOWED_TRANSITIONS } from '../../simulation/satelliteFSM';
 import SatelliteTable from './SatelliteTable';
 import SatelliteDetail from './SatelliteDetail';
+import ConfigEditor from './ConfigEditor';
 import styles from './ControlPanel.module.css';
 
 const TRANSITION_DELAY = 800;
+
+function deduceConfig(satellites) {
+  return satellites.map(sat => {
+    const lines = [`[${sat.type}.${sat.name}]`];
+    lines.push(`state = "${sat.state}"`);
+    lines.push(`role = "${sat.role}"`);
+    lines.push(`connection_uri = "${sat.connectionUri}"`);
+    lines.push(`heartbeat = ${sat.heartbeat}`);
+    if (sat.type === 'EudaqNativeWriter') {
+      lines.push(`_data.receive_from = "RandomTransmitter.Sender"`);
+      lines.push(`file_pattern = "run{run_id}_{sequence}.raw"`);
+    }
+    if (sat.type === 'RandomTransmitter') {
+      lines.push(`event_size = 1024`);
+      lines.push(`frequency = 500`);
+    }
+    if (sat.type === 'Sputnik') {
+      lines.push(`_data.receive_from = "RandomTransmitter.Sender"`);
+      lines.push(`threshold = 100`);
+    }
+    return lines.join('\n');
+  }).join('\n\n') + '\n';
+}
 
 export default function ControlPanel() {
   const dispatch = useDispatch();
@@ -22,8 +46,9 @@ export default function ControlPanel() {
   const selectedId = useSelector(s => s.satellites.selectedSatelliteId);
   const run = useSelector(s => s.run);
   const [transitioning, setTransitioning] = useState(false);
+  const [configContent, setConfigContent] = useState('');
+  const fileInputRef = useRef(null);
 
-  // Check if a global command is possible given current satellite states
   const canSend = useCallback((command) => {
     if (transitioning) return false;
     return satellites.some(sat => {
@@ -44,7 +69,6 @@ export default function ControlPanel() {
 
     dispatch(sendGlobalCommand(command));
 
-    // Simulate transition delay
     setTimeout(() => {
       dispatch(completeTransition({ command }));
       setTransitioning(false);
@@ -59,11 +83,25 @@ export default function ControlPanel() {
   };
 
   const handleSelectConfig = () => {
-    dispatch(setConfigFile('/tmp/test/config.toml'));
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelected = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setConfigContent(ev.target.result);
+      dispatch(setConfigFile(file.name));
+    };
+    reader.readAsText(file);
+    e.target.value = '';
   };
 
   const handleDeduce = () => {
-    dispatch(setConfigFile('/tmp/test/config_deduced.toml'));
+    const deduced = deduceConfig(satellites);
+    setConfigContent(deduced);
+    dispatch(setConfigFile('config_deduced.toml'));
   };
 
   const selectedSat = selectedId
@@ -73,7 +111,6 @@ export default function ControlPanel() {
   return (
     <div className={styles.panel}>
       <div className={styles.main}>
-        {/* Configuration + control row */}
         <div className={styles.toolbar}>
           <div className={styles.configSection}>
             <div className={styles.configRow}>
@@ -87,6 +124,13 @@ export default function ControlPanel() {
               />
               <button className={styles.btn} onClick={handleSelectConfig}>Select</button>
               <button className={styles.btn} onClick={handleDeduce}>Deduce</button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".toml,.ini,.cfg,.conf,.txt"
+                onChange={handleFileSelected}
+                style={{ display: 'none' }}
+              />
             </div>
             <div className={styles.configRow}>
               <label>Run Identifier:</label>
@@ -158,7 +202,8 @@ export default function ControlPanel() {
           </div>
         </div>
 
-        {/* Satellite table */}
+        <ConfigEditor configContent={configContent} onContentChange={setConfigContent} />
+
         <SatelliteTable
           satellites={satellites}
           onSelect={id => dispatch(selectSatellite(id))}
@@ -166,7 +211,6 @@ export default function ControlPanel() {
         />
       </div>
 
-      {/* Detail drawer */}
       {selectedSat && (
         <SatelliteDetail
           satellite={selectedSat}

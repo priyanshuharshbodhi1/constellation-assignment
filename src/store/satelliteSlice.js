@@ -16,8 +16,7 @@ const satelliteSlice = createSlice({
       state.configFile = action.payload;
     },
 
-    // Transition all satellites with a global command
-    sendGlobalCommand(state, action) {
+sendGlobalCommand(state, action) {
       const command = action.payload;
       const transition = getTransition(command);
       if (!transition) return;
@@ -31,8 +30,7 @@ const satelliteSlice = createSlice({
       });
     },
 
-    // Complete the transition (called after a simulated delay)
-    completeTransition(state, action) {
+completeTransition(state, action) {
       const { command } = action.payload;
       const transition = getTransition(command);
       if (!transition) return;
@@ -42,8 +40,7 @@ const satelliteSlice = createSlice({
           sat.state = transition.target;
           sat.lastCheck = new Date().toISOString();
 
-          // Set appropriate status messages
-          switch (command) {
+switch (command) {
             case 'initialize':
               sat.lastMessage = 'Configuration attached in payload';
               sat.lastResponse = 'SUCCESS';
@@ -69,8 +66,7 @@ const satelliteSlice = createSlice({
       });
     },
 
-    // Single satellite command
-    sendSatelliteCommand(state, action) {
+sendSatelliteCommand(state, action) {
       const { satelliteId, command } = action.payload;
       const sat = state.items.find(s => s.id === satelliteId);
       if (!sat) return;
@@ -95,8 +91,7 @@ const satelliteSlice = createSlice({
       }
     },
 
-    // Trigger an error on a specific satellite (for demo)
-    triggerError(state, action) {
+triggerError(state, action) {
       const sat = state.items.find(s => s.id === action.payload);
       if (sat) {
         sat.state = STATES.ERROR;

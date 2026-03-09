@@ -68,6 +68,38 @@
 .safe { color: var(--state-safe); }
 .initializing, .launching, .starting, .stopping, .landing {
   color: var(--text-secondary);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.controllers {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  padding: 4px 10px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.controllerDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--state-run);
 }
 
 .themeToggle {

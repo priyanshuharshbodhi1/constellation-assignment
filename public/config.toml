@@ -1,0 +1,31 @@
+# Constellation configuration for edda test setup
+# See https://constellation.pages.desy.de/ for format reference
+
+[Sputnik.One]
+_data.receive_from = "RandomTransmitter.Sender"
+threshold = 100
+output_directory = "/data/run"
+trigger_mode = "external"
+
+[Sputnik.Two]
+_data.receive_from = "RandomTransmitter.Sender"
+threshold = 100
+output_directory = "/data/run"
+trigger_mode = "external"
+
+[Sputnik.Three]
+_data.receive_from = "RandomTransmitter.Sender"
+threshold = 150
+output_directory = "/data/run"
+trigger_mode = "internal"
+
+[RandomTransmitter.Sender]
+event_size = 1024
+frequency = 500
+payload_type = "random"
+
+[EudaqNativeWriter.Receiver]
+_data.receive_from = "RandomTransmitter.Sender"
+file_pattern = "run{run_id}_{sequence}.raw"
+output_directory = "/data/run"
+flush_interval = 1000

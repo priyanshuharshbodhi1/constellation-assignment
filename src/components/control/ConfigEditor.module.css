@@ -1,0 +1,56 @@
+.editor {
+  border-top: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+
+.toggle {
+  width: 100%;
+  padding: 8px 16px;
+  background: none;
+  color: var(--text-secondary);
+  text-align: left;
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s;
+}
+
+.toggle:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.arrow {
+  font-size: 0.7rem;
+  width: 12px;
+}
+
+.editorBody {
+  padding: 0 16px 12px;
+}
+
+.textarea {
+  width: 100%;
+  height: 260px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+}
+
+.textarea:focus {
+  border-color: var(--accent);
+}
+
+.hint {
+  margin-top: 6px;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}

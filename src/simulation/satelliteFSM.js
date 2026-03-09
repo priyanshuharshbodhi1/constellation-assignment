@@ -1,6 +1,3 @@
-// Finite state machine for Constellation satellites
-// States and valid transitions match the real Constellation protocol
-
 export const STATES = {
   NEW: 'New',
   INIT: 'Initialized',
@@ -19,7 +16,6 @@ export const TRANSITIONAL = {
   interrupting: 'interrupting',
 };
 
-// Which global commands are allowed from each steady state
 export const ALLOWED_TRANSITIONS = {
   [STATES.NEW]: ['initialize'],
   [STATES.INIT]: ['initialize', 'launch', 'shutdown'],
@@ -29,7 +25,6 @@ export const ALLOWED_TRANSITIONS = {
   [STATES.SAFE]: ['initialize', 'shutdown'],
 };
 
-// What transitional state each command triggers
 const TRANSITION_MAP = {
   initialize: { transitional: TRANSITIONAL.initializing, target: STATES.INIT },
   launch: { transitional: TRANSITIONAL.launching, target: STATES.ORBIT },
@@ -42,7 +37,6 @@ export function getTransition(command) {
   return TRANSITION_MAP[command] || null;
 }
 
-// State colors matching the real MissionControl UI
 export function getStateColor(state) {
   switch (state) {
     case STATES.NEW: return 'var(--state-new)';
@@ -55,7 +49,6 @@ export function getStateColor(state) {
   }
 }
 
-// Satellite type definitions with realistic names from the screenshots
 export const SATELLITE_PRESETS = [
   { type: 'Sputnik', name: 'One', role: 'DYNAMIC' },
   { type: 'Sputnik', name: 'Two', role: 'DYNAMIC' },

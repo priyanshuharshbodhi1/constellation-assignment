@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   setSubscriptionLevel,
@@ -10,12 +10,13 @@ import {
 import { LOG_LEVELS, TOPICS } from '../../simulation/logGenerator';
 import styles from './LogPanel.module.css';
 
-const LEVEL_PRIORITY = Object.fromEntries(LOG_LEVELS.map((l, i) => [l, i]));
-
-function LogEntry({ entry }) {
+function LogEntry({ entry, onDoubleClick }) {
   const levelClass = entry.level.toLowerCase();
   return (
-    <div className={`${styles.entry} ${styles[levelClass]}`}>
+    <div
+      className={`${styles.entry} ${styles[levelClass]}`}
+      onDoubleClick={() => onDoubleClick(entry)}
+    >
       <span className={styles.timestamp}>
         {new Date(entry.timestamp).toLocaleTimeString('en-GB', { hour12: false })}
       </span>
@@ -27,19 +28,41 @@ function LogEntry({ entry }) {
   );
 }
 
+function LogDetailModal({ entry, onClose }) {
+  if (!entry) return null;
+  return (
+    <>
+      <div className={styles.modalBackdrop} onClick={onClose} />
+      <div className={styles.modal}>
+        <div className={styles.modalHeader}>
+          <h3>Log Message Detail</h3>
+          <button className={styles.modalClose} onClick={onClose}>×</button>
+        </div>
+        <table className={styles.modalTable}>
+          <tbody>
+            <tr><td>Timestamp</td><td>{entry.timestamp}</td></tr>
+            <tr><td>Level</td><td className={styles[entry.level.toLowerCase()]}><span className={styles.level}>{entry.level}</span></td></tr>
+            <tr><td>Sender</td><td>{entry.sender}</td></tr>
+            <tr><td>Topic</td><td>{entry.topic}</td></tr>
+            <tr><td>Message</td><td>{entry.message}</td></tr>
+            <tr><td>ID</td><td>{entry.id}</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
 export default function LogPanel() {
   const dispatch = useDispatch();
   const { entries, subscriptionLevel, filters, paused } = useSelector(s => s.logs);
   const satellites = useSelector(s => s.satellites.items);
   const listRef = useRef(null);
   const autoScrollRef = useRef(true);
+  const [detailEntry, setDetailEntry] = useState(null);
 
-  // Get unique senders from current satellites
-  const senderOptions = useMemo(() => {
-    return satellites.map(s => s.id);
-  }, [satellites]);
+  const senderOptions = useMemo(() => satellites.map(s => s.id), [satellites]);
 
-  // Apply filters on the client side
   const filteredEntries = useMemo(() => {
     return entries.filter(entry => {
       if (filters.level && entry.level !== filters.level) return false;
@@ -50,7 +73,6 @@ export default function LogPanel() {
     });
   }, [entries, filters]);
 
-  // Auto-scroll to bottom on new messages
   useEffect(() => {
     if (autoScrollRef.current && listRef.current) {
       listRef.current.scrollTop = listRef.current.scrollHeight;
@@ -65,7 +87,6 @@ export default function LogPanel() {
 
   return (
     <div className={styles.panel}>
-      {/* Toolbar */}
       <div className={styles.toolbar}>
         <div className={styles.filterGroup}>
           <div className={styles.filterItem}>
@@ -141,18 +162,18 @@ export default function LogPanel() {
         </div>
       </div>
 
-      {/* Log list */}
       <div className={styles.logList} ref={listRef} onScroll={handleScroll}>
         {filteredEntries.length === 0 ? (
           <div className={styles.emptyState}>
             {entries.length === 0 ? 'Waiting for log messages...' : 'No messages match current filters'}
           </div>
         ) : (
-          filteredEntries.map(entry => <LogEntry key={entry.id} entry={entry} />)
+          filteredEntries.map(entry => (
+            <LogEntry key={entry.id} entry={entry} onDoubleClick={setDetailEntry} />
+          ))
         )}
       </div>
 
-      {/* Status bar */}
       <div className={styles.statusBar}>
         <span>
           {filteredEntries.length !== entries.length
@@ -161,6 +182,8 @@ export default function LogPanel() {
         </span>
         {paused && <span className={styles.pauseBadge}>PAUSED</span>}
       </div>
+
+      <LogDetailModal entry={detailEntry} onClose={() => setDetailEntry(null)} />
     </div>
   );
 }

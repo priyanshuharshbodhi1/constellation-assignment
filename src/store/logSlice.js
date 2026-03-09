@@ -6,7 +6,7 @@ const logSlice = createSlice({
   name: 'logs',
   initialState: {
     entries: [],
-    subscriptionLevel: 'INFO', // minimum level to receive
+    subscriptionLevel: 'INFO',
     filters: {
       level: '',
       sender: '',
@@ -19,7 +19,6 @@ const logSlice = createSlice({
     addLogEntry(state, action) {
       if (state.paused) return;
       state.entries.push(action.payload);
-      // Keep buffer from growing unbounded
       if (state.entries.length > MAX_LOG_ENTRIES) {
         state.entries = state.entries.slice(-MAX_LOG_ENTRIES);
       }
