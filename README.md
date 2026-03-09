@@ -2,9 +2,6 @@
 
 A browser-based control and monitoring interface for Constellation, the autonomous DAQ system for dynamic experimental setups. Built as a demo/prototype showing how MissionControl and Observatory could work as a unified web application.
 
-
-## Demo Video
-
 <!-- <div align="center">
   <video width="100%" controls>
     <source src="https://github.com/priyanshuharshbodhi1/constellation-assignment/raw/main/public/Constellation%20Web%20(Assignment%20Demo%20Video).mp4" type="video/mp4">
@@ -12,7 +9,9 @@ A browser-based control and monitoring interface for Constellation, the autonomo
     Your browser does not support the video tag.
   </video>
 </div> -->
-[![Demo Video](./public/demo-thumbnail.png)](./public/Constellation%20Web%20(Assignment%20Demo%20Video).mp4)
+## 🎥 Demo Video
+
+▶️ [Watch the 2 min Demo Video by clicking here](https://youtu.be/Bz5PRt5BP_E)
 
 ## Features
 
