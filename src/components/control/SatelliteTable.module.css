@@ -83,6 +83,9 @@
 .run { color: var(--state-run); }
 .error { color: var(--state-error); }
 .safe { color: var(--state-safe); }
+.initializing, .launching, .starting, .stopping, .landing {
+  color: var(--text-secondary);
+}
 
 .msgCell {
   display: flex;
