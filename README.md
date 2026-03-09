@@ -3,6 +3,10 @@
 A browser-based control and monitoring interface for Constellation, the autonomous DAQ system for dynamic experimental setups. Built as a demo/prototype showing how MissionControl and Observatory could work as a unified web application.
 
 
+## Demo Video
+
+<video src="public/Constellation%20Web%20(Assignment%20Demo%20Video).mp4" width="100%" controls></video>
+
 ## Features
 
 ### a. Control Panel (MissionControl equivalent)
