@@ -1,53 +1,29 @@
 const LOG_LEVELS = ['TRACE', 'DEBUG', 'INFO', 'STATUS', 'WARNING', 'CRITICAL'];
 
-const TOPICS = ['CSCP', 'CHIRP', 'DATA', 'FSM', 'HEARTBEAT', 'CONFIG', 'SYSTEM'];
-
-const MESSAGE_TEMPLATES = {
-  CSCP: [
-    'Received command request from controller',
-    'Sending response with payload attached',
-    'Command execution completed successfully',
-    'Processing incoming CSCP frame',
-  ],
-  CHIRP: [
-    'Broadcast discovery message sent',
-    'New satellite discovered on network',
-    'Satellite departure detected',
-    'Network topology updated',
-    'Service announcement received',
-  ],
-  DATA: [
-    'Data frame received: {n} events',
-    'Buffer utilization at {pct}%',
-    'Writing data block to output stream',
-    'Payload checksum verified',
-    'Event rate: {rate} Hz',
-  ],
-  FSM: [
-    'State transition: {from} -> {to}',
-    'Transition completed in {ms}ms',
-    'All conditions for transition met',
-    'Waiting for dependent satellites',
-  ],
-  HEARTBEAT: [
-    'Heartbeat received from {sat}',
-    'Lives remaining: {lives}',
-    'Heartbeat interval: 3000ms',
-    'Extrasystole detected, resetting counter',
-  ],
-  CONFIG: [
-    'Configuration parameter updated: {key}',
-    'Loading configuration from payload',
-    'Configuration validated successfully',
-    'Applied {n} configuration parameters',
-  ],
-  SYSTEM: [
-    'Memory usage: {mem}MB',
-    'Thread pool active: {threads} workers',
-    'ZMQ socket bound to port {port}',
-    'Cleanup routine completed',
-  ],
-};
+// In real Constellation CMDP, the log topic is just the satellite name (e.g. "Mariner.Nine").
+// There are no category topics like CSCP/CHIRP/etc.
+const MESSAGE_TEMPLATES = [
+  'Received command request from controller',
+  'Sending response with payload attached',
+  'Command execution completed successfully',
+  'Processing incoming CSCP frame',
+  'Broadcast discovery message sent',
+  'Data frame received: {n} events',
+  'Buffer utilization at {pct}%',
+  'Writing data block to output stream',
+  'Event rate: {rate} Hz',
+  'State transition: {from} -> {to}',
+  'Transition completed in {ms}ms',
+  'All conditions for transition met',
+  'Waiting for dependent satellites',
+  'Configuration parameter updated: {key}',
+  'Configuration validated successfully',
+  'Applied {n} configuration parameters',
+  'Memory usage: {mem}MB',
+  'ZMQ socket bound to port {port}',
+  'Cleanup routine completed',
+  'Heartbeat interval: 3000ms',
+];
 
 let msgCounter = 0;
 
@@ -76,9 +52,9 @@ export function generateLogEntry(satellites) {
     ? pickRandom(satellites)
     : { id: 'System', type: 'System', name: 'Core' };
 
-  const topic = pickRandom(TOPICS);
-  const templates = MESSAGE_TEMPLATES[topic];
-  const message = fillTemplate(pickRandom(templates));
+  // In real Constellation, the CMDP topic is the satellite name itself
+  const senderName = sender.id || `${sender.type}.${sender.name}`;
+  const message = fillTemplate(pickRandom(MESSAGE_TEMPLATES));
 
   // weighted distribution
   let level;
@@ -96,10 +72,10 @@ export function generateLogEntry(satellites) {
     id: msgCounter,
     timestamp: new Date().toISOString(),
     level,
-    sender: sender.id || `${sender.type}.${sender.name}`,
-    topic,
+    sender: senderName,
+    topic: senderName,
     message,
   };
 }
 
-export { LOG_LEVELS, TOPICS };
+export { LOG_LEVELS };
