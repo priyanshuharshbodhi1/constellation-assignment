@@ -7,7 +7,9 @@ import {
   clearLogs,
   togglePause,
 } from '../../store/logSlice';
-import { LOG_LEVELS, TOPICS } from '../../simulation/logGenerator';
+import { LOG_LEVELS } from '../../simulation/logGenerator';
+
+const LEVEL_ORDER = Object.fromEntries(LOG_LEVELS.map((l, i) => [l, i]));
 import styles from './LogPanel.module.css';
 
 function LogEntry({ entry, onDoubleClick }) {
@@ -22,7 +24,6 @@ function LogEntry({ entry, onDoubleClick }) {
       </span>
       <span className={`${styles.level} ${styles[levelClass]}`}>{entry.level}</span>
       <span className={styles.sender}>{entry.sender}</span>
-      <span className={styles.topic}>{entry.topic}</span>
       <span className={styles.message}>{entry.message}</span>
     </div>
   );
@@ -43,7 +44,6 @@ function LogDetailModal({ entry, onClose }) {
             <tr><td>Timestamp</td><td>{entry.timestamp}</td></tr>
             <tr><td>Level</td><td className={styles[entry.level.toLowerCase()]}><span className={styles.level}>{entry.level}</span></td></tr>
             <tr><td>Sender</td><td>{entry.sender}</td></tr>
-            <tr><td>Topic</td><td>{entry.topic}</td></tr>
             <tr><td>Message</td><td>{entry.message}</td></tr>
             <tr><td>ID</td><td>{entry.id}</td></tr>
           </tbody>
@@ -65,7 +65,7 @@ export default function LogPanel() {
 
   const filteredEntries = useMemo(() => {
     return entries.filter(entry => {
-      if (filters.level && entry.level !== filters.level) return false;
+      if (filters.level && LEVEL_ORDER[entry.level] < LEVEL_ORDER[filters.level]) return false;
       if (filters.sender && entry.sender !== filters.sender) return false;
       if (filters.topic && entry.topic !== filters.topic) return false;
       if (filters.text && !entry.message.toLowerCase().includes(filters.text.toLowerCase())) return false;
@@ -108,17 +108,6 @@ export default function LogPanel() {
             >
               <option value="">All</option>
               {senderOptions.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
-          </div>
-
-          <div className={styles.filterItem}>
-            <label>Topic</label>
-            <select
-              value={filters.topic}
-              onChange={e => dispatch(setFilter({ key: 'topic', value: e.target.value }))}
-            >
-              <option value="">All</option>
-              {TOPICS.map(t => <option key={t} value={t}>{t}</option>)}
             </select>
           </div>
 
