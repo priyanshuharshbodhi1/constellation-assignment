@@ -13,6 +13,7 @@
  */
 
 const BACKOFF_MS = [1000, 2000, 4000, 8000, 16000, 30000];
+const PING_TIMEOUT_MS = 30000;
 
 let _socket = null;
 let _dispatch = null;
