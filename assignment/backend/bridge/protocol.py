@@ -79,8 +79,8 @@ def satellite_to_dict(
         "lastChanged": last_changed.isoformat() if last_changed else None,
         "connectionUri": connection_uri,
         "version": version,
-        "lastMessage": "",
-        "lastResponse": "",
+        "lastMessage": None,
+        "lastResponse": None,
     }
 
 
