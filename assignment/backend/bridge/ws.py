@@ -57,7 +57,7 @@ async def websocket_endpoint(ws: WebSocket) -> None:
             await _handle_message(data, ws, client, listener, manager)
 
     except WebSocketDisconnect:
-        pass
+        log.debug("Client disconnected normally")
     except Exception:
         log.exception("Unhandled error in WebSocket handler")
     finally:
