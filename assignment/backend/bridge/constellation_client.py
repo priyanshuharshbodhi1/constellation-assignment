@@ -23,9 +23,10 @@ log = logging.getLogger(__name__)
 
 
 class ConstellationClient:
-    def __init__(self, group: str, interface: list[str] | None = None) -> None:
+    def __init__(self, group: str, interface: list[str] | None = None, poll_interval: float = 0.5) -> None:
         self._group = group
         self._interface = interface
+        self._poll_interval = poll_interval
         self._ctrl = None
         self._event_queue: asyncio.Queue | None = None
         self._loop: asyncio.AbstractEventLoop | None = None
@@ -183,7 +184,7 @@ class ConstellationClient:
         from constellation.core.message.cscp1 import SatelliteState
 
         while not self._stop_event.is_set():
-            time.sleep(0.5)
+            time.sleep(self._poll_interval)
 
             if self._loop is None or self._event_queue is None:
                 continue

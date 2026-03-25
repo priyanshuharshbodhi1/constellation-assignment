@@ -35,6 +35,7 @@ async def lifespan(app: FastAPI):
     client = ConstellationClient(
         group=settings.constellation_group,
         interface=settings.constellation_interface,
+        poll_interval=settings.poll_interval,
     )
     client.attach_queue(event_queue, loop)
 
