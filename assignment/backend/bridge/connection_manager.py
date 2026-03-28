@@ -20,12 +20,12 @@ class ConnectionManager:
         await ws.accept()
         async with self._lock:
             self._clients.add(ws)
-        log.debug("Client connected (total: %d)", len(self._clients))
+        log.info("Browser client connected (total: %d)", len(self._clients))
 
     async def disconnect(self, ws: WebSocket) -> None:
         async with self._lock:
             self._clients.discard(ws)
-        log.debug("Client disconnected (total: %d)", len(self._clients))
+        log.info("Browser client disconnected (total: %d)", len(self._clients))
 
     async def send(self, ws: WebSocket, message: dict) -> None:
         """Send a message to a single client, silently dropping dead connections."""
