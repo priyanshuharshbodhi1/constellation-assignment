@@ -25,3 +25,12 @@ assignment/dist-ssr
 
 # Constellation fork — tracked as separate git repo
 constellation/
+
+/svelte-app
+
+/sage | select(. != null)
+
+/.venv
+__pycache__/
+*.pyc
+*.pyo
