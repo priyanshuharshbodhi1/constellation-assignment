@@ -8,7 +8,7 @@ import {
   selectSatellite,
 } from '../../store/satelliteSlice';
 import { startRun, stopRun, setRunIdentifier, setSequence } from '../../store/runSlice';
-import { STATES, ALLOWED_TRANSITIONS } from '../../simulation/satelliteFSM';
+import { ALLOWED_TRANSITIONS } from '../../simulation/satelliteFSM';
 import SatelliteTable from './SatelliteTable';
 import SatelliteDetail from './SatelliteDetail';
 import ConfigEditor from './ConfigEditor';
