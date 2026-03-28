@@ -7,10 +7,11 @@ A browser-based control and monitoring interface for Constellation, the autonomo
 
 <div align="center">
   <video width="100%" controls>
-    <source src="https://github.com/priyanshuharshbodhi1/constellation-assignment/raw/main/public/Constellation%20Web%20(Assignment%20Demo%20Video).mp4" type="video/mp4">
-    <source src="https://github.com/priyanshuharshbodhi1/constellation-assignment/raw/main/public/Constellation%20Web%20(Assignment%20Demo%20Video).webm" type="video/webm">
+    <source src="https://raw.githubusercontent.com/priyanshuharshbodhi1/constellation-assignment/main/public/demo_video.mp4" type="video/mp4">
+    <source src="https://raw.githubusercontent.com/priyanshuharshbodhi1/constellation-assignment/main/public/demo_video.webm" type="video/webm">
     Your browser does not support the video tag.
   </video>
+  <p><a href="https://raw.githubusercontent.com/priyanshuharshbodhi1/constellation-assignment/main/public/demo_video.mp4">Download or watch the demo video here if the player doesn't load.</a></p>
 </div>
 
 ## Features
