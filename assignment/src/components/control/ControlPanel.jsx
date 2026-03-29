@@ -45,6 +45,7 @@ export default function ControlPanel() {
   const configFile = useSelector(s => s.satellites.configFile);
   const selectedId = useSelector(s => s.satellites.selectedSatelliteId);
   const run = useSelector(s => s.run);
+  const mode = useSelector(s => s.connection.mode);
   const [transitioning, setTransitioning] = useState(false);
   const [configContent, setConfigContent] = useState('');
   const fileInputRef = useRef(null);
@@ -59,21 +60,24 @@ export default function ControlPanel() {
 
   const handleGlobalCommand = useCallback((command) => {
     if (!canSend(command)) return;
-    setTransitioning(true);
 
-    if (command === 'start') {
-      dispatch(startRun());
-    } else if (command === 'stop') {
-      dispatch(stopRun());
+    if (mode === 'live') {
+      // Middleware intercepts this and sends it over WebSocket.
+      // State changes come back as satellite_list / state_update events.
+      dispatch(sendGlobalCommand(command));
+      return;
     }
 
+    // Simulation mode: drive the local FSM.
+    setTransitioning(true);
+    if (command === 'start') dispatch(startRun());
+    else if (command === 'stop') dispatch(stopRun());
     dispatch(sendGlobalCommand(command));
-
     setTimeout(() => {
       dispatch(completeTransition({ command }));
       setTransitioning(false);
     }, TRANSITION_DELAY);
-  }, [dispatch, canSend]);
+  }, [dispatch, canSend, mode]);
 
   const handleShutdown = () => {
     if (run.isRunning) {

@@ -69,17 +69,17 @@ const websocketMiddleware = store => next => action => {
 
   if (connection.mode === 'live' && connection.status === 'connected') {
     if (action.type === 'satellites/sendGlobalCommand') {
-      wsService.send({ type: 'global_command', command: action.payload });
-      // Do NOT call next(action) — we don't want the simulation reducer to run.
+      const command = action.payload;
+      // initialize always requires a config dict; empty is valid for demo satellites.
+      const payload = command === 'initialize' ? ({} ) : undefined;
+      wsService.send({ type: 'global_command', command, payload });
       return;
     }
 
     if (action.type === 'satellites/sendSatelliteCommand') {
-      wsService.send({
-        type: 'command',
-        satellite: action.payload.satelliteId,
-        command: action.payload.command,
-      });
+      const { satelliteId, command } = action.payload;
+      const payload = command === 'initialize' ? {} : undefined;
+      wsService.send({ type: 'command', satellite: satelliteId, command, payload });
       return;
     }
 
