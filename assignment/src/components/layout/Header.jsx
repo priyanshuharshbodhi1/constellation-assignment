@@ -25,6 +25,7 @@ export default function Header({ theme, onToggleTheme }) {
   const satellites = useSelector(s => s.satellites.items);
   const constellationName = useSelector(s => s.satellites.constellationName);
   const run = useSelector(s => s.run);
+  const connection = useSelector(s => s.connection);
 
   const globalState = deriveGlobalState(satellites);
   const runIdDisplay = run.isRunning
@@ -73,9 +74,24 @@ export default function Header({ theme, onToggleTheme }) {
       </div>
 
       <div className={styles.headerRight}>
-        <div className={styles.controllers} title="Connected controllers">
-          <span className={styles.controllerDot} />
-          2 controllers
+        <div
+          className={styles.connectionBadge}
+          data-status={connection.status}
+          data-mode="live"
+          title={
+            connection.status === 'connected'
+              ? 'Connected to Constellation bridge'
+              : connection.status === 'connecting'
+              ? 'Connecting to bridge...'
+              : 'Bridge disconnected — retrying'
+          }
+        >
+          <span className={styles.connectionDot} />
+          {connection.status === 'connected'
+            ? 'Live'
+            : connection.status === 'connecting'
+            ? 'Connecting'
+            : 'Disconnected'}
         </div>
         <button
           className={styles.themeToggle}

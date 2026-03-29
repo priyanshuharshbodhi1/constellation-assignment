@@ -11,6 +11,7 @@ const LEVEL_PRIORITY = Object.fromEntries(LOG_LEVELS.map((l, i) => [l, i]));
 
 export function useSimulation() {
   const dispatch = useDispatch();
+  const mode = useSelector(s => s.connection.mode);
   const satellites = useSelector(s => s.satellites.items);
   const isRunning = useSelector(s => s.run.isRunning);
   const subLevel = useSelector(s => s.logs.subscriptionLevel);
@@ -24,6 +25,7 @@ export function useSimulation() {
   useEffect(() => { subLevelRef.current = subLevel; }, [subLevel]);
 
   useEffect(() => {
+    if (mode !== 'simulation') return;
     // Heartbeat ticker - every 3s like real Constellation
     const heartbeatInterval = setInterval(() => {
       dispatch(updateHeartbeats());
@@ -64,5 +66,5 @@ export function useSimulation() {
       clearInterval(telemetryInterval);
       clearInterval(timerInterval);
     };
-  }, [dispatch]);
+  }, [dispatch, mode]);
 }

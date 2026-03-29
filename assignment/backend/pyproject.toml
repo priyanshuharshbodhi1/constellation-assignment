@@ -1,0 +1,22 @@
+[project]
+name = "constellation-bridge"
+version = "0.1.0"
+description = "WebSocket bridge between browsers and a Constellation DAQ network"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic-settings>=2.0",
+    "websockets>=12.0",
+]
+
+# Install the ConstellationDAQ library from the local fork:
+#   pip install -e ../../constellation-glab/
+# (requires meson and ninja: pip install meson ninja)
+#
+# If you prefer not to build, run.py adds the Python sources to sys.path
+# automatically, so a full meson build is not required for development.
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.backends.legacy:build"

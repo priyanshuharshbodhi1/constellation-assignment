@@ -83,23 +83,42 @@
   flex-shrink: 0;
 }
 
-.controllers {
+.connectionBadge {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 0.72rem;
-  color: var(--text-muted);
   padding: 4px 10px;
   background: var(--bg-tertiary);
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
+  color: var(--text-muted);
 }
 
-.controllerDot {
+.connectionDot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
+  background: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.connectionBadge[data-mode="simulation"] .connectionDot {
+  background: var(--text-muted);
+}
+
+.connectionBadge[data-mode="live"][data-status="connected"] .connectionDot {
   background: var(--state-run);
+}
+
+.connectionBadge[data-mode="live"][data-status="connecting"] .connectionDot {
+  background: var(--state-orbit);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.connectionBadge[data-mode="live"][data-status="disconnected"] .connectionDot,
+.connectionBadge[data-mode="live"][data-status="error"] .connectionDot {
+  background: var(--state-error);
 }
 
 .themeToggle {
