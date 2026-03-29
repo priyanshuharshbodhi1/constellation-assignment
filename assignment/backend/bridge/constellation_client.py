@@ -148,13 +148,13 @@ class ConstellationClient:
     def _build_satellite_list(self) -> list[dict]:
         from constellation.core.message.cscp1 import SatelliteState
 
-        states_lc = self._ctrl.states          # lowercase canonical → SatelliteState
+        states_lc = self._ctrl.states          # canonical → SatelliteState
         state_changes = self._ctrl.heartbeat_state_changes
         lives_map = self._read_lives()
 
         result = []
         for canonical, link in self._ctrl.constellation.satellites.items():
-            state_enum = states_lc.get(canonical.lower(), SatelliteState.NEW)
+            state_enum = states_lc.get(canonical, SatelliteState.NEW)
             state_name = state_enum.name if hasattr(state_enum, "name") else str(state_enum)
             result.append(
                 satellite_to_dict(
@@ -162,7 +162,7 @@ class ConstellationClient:
                     sat_type=link._class_name,
                     sat_name=link._name,
                     state_name=state_name,
-                    lives=lives_map.get(canonical.lower(), 3),
+                    lives=lives_map.get(canonical, 3),
                     last_changed=state_changes.get(canonical),
                 )
             )
@@ -173,7 +173,7 @@ class ConstellationClient:
         result: dict[str, int] = {}
         try:
             for hb in self._ctrl._remote_heartbeat_states.values():
-                result[hb.name.lower()] = hb.lives
+                result[hb.name] = hb.lives
         except Exception:
             pass
         return result
@@ -207,7 +207,7 @@ class ConstellationClient:
                 # Satellite set unchanged — send per-satellite state_update events
                 # only for satellites whose state has actually changed.
                 for canonical in current_set:
-                    state_enum = states_lc.get(canonical.lower(), SatelliteState.NEW)
+                    state_enum = states_lc.get(canonical, SatelliteState.NEW)
                     state_name = state_enum.name if hasattr(state_enum, "name") else str(state_enum)
                     display = state_display(state_name)
 

@@ -10,6 +10,16 @@
  */
 
 import wsService from '../services/websocket';
+
+// Build the correct payload for each Constellation command.
+// initialize → config dict (empty is valid for demo satellites)
+// start      → run identifier string  e.g. "run_0"
+// everything else → no payload
+function _commandPayload(command, run) {
+  if (command === 'initialize') return {};
+  if (command === 'start') return `${run.identifier}_${run.sequence}`;
+  return undefined;
+}
 import { satellitesReceived, satelliteStateUpdated, commandResultReceived, setConstellationName } from './satelliteSlice';
 import { wsLogReceived } from './logSlice';
 import { startRun, stopRun } from './runSlice';
@@ -70,15 +80,16 @@ const websocketMiddleware = store => next => action => {
   if (connection.mode === 'live' && connection.status === 'connected') {
     if (action.type === 'satellites/sendGlobalCommand') {
       const command = action.payload;
-      // initialize always requires a config dict; empty is valid for demo satellites.
-      const payload = command === 'initialize' ? ({} ) : undefined;
+      const { run } = store.getState();
+      const payload = _commandPayload(command, run);
       wsService.send({ type: 'global_command', command, payload });
       return;
     }
 
     if (action.type === 'satellites/sendSatelliteCommand') {
       const { satelliteId, command } = action.payload;
-      const payload = command === 'initialize' ? {} : undefined;
+      const { run } = store.getState();
+      const payload = _commandPayload(command, run);
       wsService.send({ type: 'command', satellite: satelliteId, command, payload });
       return;
     }
