@@ -6,36 +6,20 @@ Usage:
     python run.py
     python run.py --group myexp --port 8000
 
-The bridge requires the ConstellationDAQ Python library. If it is not
-installed, this script automatically adds the local fork's source tree to
-sys.path — no meson build required for development:
+Requires the ConstellationDAQ Python package (constellationdaq>=0.7).
+Run with the venv that has it installed:
 
-    constellation-assignment/
-    ├── assignment/backend/   ← you are here
-    └── constellation-glab/python/constellation/   ← used automatically
+    ~/repos/constellation/.venv/bin/python run.py --group demo
 """
 
 import argparse
 import logging
-import os
 import sys
 
-# ---------------------------------------------------------------------------
-# Make the Constellation library importable without a full meson install.
-# We resolve the path relative to this file so the script works regardless of
-# the working directory it is launched from.
-# ---------------------------------------------------------------------------
-_here = os.path.dirname(os.path.abspath(__file__))
-_repo_root = os.path.dirname(os.path.dirname(_here))
-_constellation_python = os.path.join(_repo_root, "constellation-glab", "python")
+import uvicorn
 
-if os.path.isdir(_constellation_python) and _constellation_python not in sys.path:
-    sys.path.insert(0, _constellation_python)
-
-import uvicorn  # noqa: E402 — must come after sys.path manipulation
-
-from bridge.app import create_app  # noqa: E402
-from bridge.settings import Settings  # noqa: E402
+from bridge.app import create_app
+from bridge.settings import Settings
 
 
 def _parse_args() -> argparse.Namespace:

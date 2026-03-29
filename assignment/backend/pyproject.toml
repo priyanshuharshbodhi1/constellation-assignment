@@ -10,12 +10,9 @@ dependencies = [
     "websockets>=12.0",
 ]
 
-# Install the ConstellationDAQ library from the local fork:
-#   pip install -e ../../constellation-glab/
-# (requires meson and ninja: pip install meson ninja)
-#
-# If you prefer not to build, run.py adds the Python sources to sys.path
-# automatically, so a full meson build is not required for development.
+# ConstellationDAQ is installed in ~/repos/constellation/.venv (constellationdaq>=0.7).
+# Run the bridge with that venv:
+#   ~/repos/constellation/.venv/bin/python run.py --group demo
 
 [build-system]
 requires = ["setuptools"]

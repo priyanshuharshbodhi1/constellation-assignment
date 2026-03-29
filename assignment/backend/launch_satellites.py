@@ -16,15 +16,10 @@ Usage:
 """
 
 import argparse
-import os
 import signal
 import subprocess
 import sys
 import time
-
-_here = os.path.dirname(os.path.abspath(__file__))
-_repo_root = os.path.dirname(os.path.dirname(_here))
-_constellation_python = os.path.join(_repo_root, "constellation-glab", "python")
 
 _SATELLITES = [
     ("PyRandomTransmitter", "Sender"),
@@ -38,11 +33,6 @@ def main() -> None:
     parser.add_argument("--group", default="constellation", help="Constellation group (default: constellation)")
     args = parser.parse_args()
 
-    env = os.environ.copy()
-    pythonpath = env.get("PYTHONPATH", "")
-    if _constellation_python not in pythonpath:
-        env["PYTHONPATH"] = _constellation_python + (os.pathsep + pythonpath if pythonpath else "")
-
     procs: list[tuple[str, str, subprocess.Popen]] = []
 
     print(f"Starting satellites in group '{args.group}'...")
@@ -52,7 +42,7 @@ def main() -> None:
             "--name", sat_name,
             "--group", args.group,
         ]
-        p = subprocess.Popen(cmd, env=env)
+        p = subprocess.Popen(cmd)
         procs.append((sat_class, sat_name, p))
         # Brief pause so each satellite's CHIRP OFFER does not collide
         time.sleep(0.4)
