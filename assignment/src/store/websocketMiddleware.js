@@ -10,7 +10,7 @@
  */
 
 import wsService from '../services/websocket';
-import { satellitesReceived, satelliteStateUpdated, commandResultReceived } from './satelliteSlice';
+import { satellitesReceived, satelliteStateUpdated, commandResultReceived, setConstellationName } from './satelliteSlice';
 import { wsLogReceived } from './logSlice';
 import { startRun, stopRun } from './runSlice';
 
@@ -38,6 +38,7 @@ const websocketMiddleware = store => next => action => {
     switch (msg.type) {
       case 'satellite_list':
         store.dispatch(satellitesReceived(msg.satellites));
+        if (msg.group) store.dispatch(setConstellationName(msg.group));
         break;
 
       case 'state_update':

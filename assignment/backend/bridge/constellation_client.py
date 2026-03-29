@@ -17,7 +17,7 @@ import time
 from datetime import datetime
 from typing import Any
 
-from .protocol import EVT_STATE_UPDATE, satellite_to_dict, state_display
+from .protocol import EVT_SATELLITE_LIST, EVT_STATE_UPDATE, satellite_to_dict, state_display
 
 log = logging.getLogger(__name__)
 
@@ -189,33 +189,39 @@ class ConstellationClient:
                 continue
 
             try:
+                current_set = set(self._ctrl.constellation.satellites.keys())
                 states_lc = self._ctrl.states
                 lives_map = self._read_lives()
 
-                # Check for state changes in connected satellites
-                for canonical, link in self._ctrl.constellation.satellites.items():
+                # When the satellite set changes (arrival or departure), push a
+                # full snapshot so every client has a consistent list.
+                if current_set != set(self._last_states.keys()):
+                    snapshot = self._build_satellite_list()
+                    self._last_states = {s["id"]: s["state"] for s in snapshot}
+                    self._loop.call_soon_threadsafe(
+                        self._event_queue.put_nowait,
+                        {"type": EVT_SATELLITE_LIST, "satellites": snapshot, "group": self._group},
+                    )
+                    continue
+
+                # Satellite set unchanged — send per-satellite state_update events
+                # only for satellites whose state has actually changed.
+                for canonical in current_set:
                     state_enum = states_lc.get(canonical.lower(), SatelliteState.NEW)
                     state_name = state_enum.name if hasattr(state_enum, "name") else str(state_enum)
                     display = state_display(state_name)
 
                     if self._last_states.get(canonical) != display:
                         self._last_states[canonical] = display
-                        event = {
-                            "type": EVT_STATE_UPDATE,
-                            "id": canonical,
-                            "state": display,
-                            "lives": lives_map.get(canonical.lower(), 3),
-                        }
-                        self._loop.call_soon_threadsafe(self._event_queue.put_nowait, event)
-
-                # Detect satellites that have departed
-                departed = [c for c in self._last_states if c not in self._ctrl.constellation.satellites]
-                for canonical in departed:
-                    del self._last_states[canonical]
-                    self._loop.call_soon_threadsafe(
-                        self._event_queue.put_nowait,
-                        {"type": EVT_STATE_UPDATE, "id": canonical, "state": "Error", "lives": 0},
-                    )
+                        self._loop.call_soon_threadsafe(
+                            self._event_queue.put_nowait,
+                            {
+                                "type": EVT_STATE_UPDATE,
+                                "id": canonical,
+                                "state": display,
+                                "lives": lives_map.get(canonical.lower(), 3),
+                            },
+                        )
 
             except Exception:
                 log.exception("State poll error")

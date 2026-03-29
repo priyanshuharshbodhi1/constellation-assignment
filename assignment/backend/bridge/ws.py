@@ -40,7 +40,11 @@ async def websocket_endpoint(ws: WebSocket) -> None:
         # Immediately send current satellite state so the UI is consistent
         # on (re)connect without waiting for the next poll cycle.
         snapshot = await asyncio.to_thread(client.get_satellite_list)
-        await manager.send(ws, {"type": "satellite_list", "satellites": snapshot})
+        await manager.send(ws, {
+            "type": "satellite_list",
+            "satellites": snapshot,
+            "group": client._group,
+        })
 
         while True:
             try:
@@ -96,7 +100,11 @@ async def _handle_message(msg: dict, ws: WebSocket, client, listener, manager) -
 
     elif msg_type == CMD_GET_SATELLITE_LIST:
         snapshot = await asyncio.to_thread(client.get_satellite_list)
-        await manager.send(ws, {"type": "satellite_list", "satellites": snapshot})
+        await manager.send(ws, {
+            "type": "satellite_list",
+            "satellites": snapshot,
+            "group": client._group,
+        })
 
     else:
         log.debug("Unrecognised message type: %r", msg_type)

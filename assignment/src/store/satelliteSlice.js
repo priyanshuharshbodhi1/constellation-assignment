@@ -1,13 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { SATELLITE_PRESETS, createSatellite, STATES, getTransition, ALLOWED_TRANSITIONS } from '../simulation/satelliteFSM';
-
-const initialSatellites = SATELLITE_PRESETS.map(createSatellite);
+import { STATES, getTransition, ALLOWED_TRANSITIONS } from '../simulation/satelliteFSM';
 
 const satelliteSlice = createSlice({
   name: 'satellites',
   initialState: {
-    items: initialSatellites,
-    constellationName: 'edda',
+    items: [],
+    constellationName: '',
     configFile: '',
     selectedSatelliteId: null,
   },
@@ -16,7 +14,7 @@ const satelliteSlice = createSlice({
       state.configFile = action.payload;
     },
 
-sendGlobalCommand(state, action) {
+    sendGlobalCommand(state, action) {
       const command = action.payload;
       const transition = getTransition(command);
       if (!transition) return;
@@ -30,7 +28,7 @@ sendGlobalCommand(state, action) {
       });
     },
 
-completeTransition(state, action) {
+    completeTransition(state, action) {
       const { command } = action.payload;
       const transition = getTransition(command);
       if (!transition) return;
@@ -40,7 +38,7 @@ completeTransition(state, action) {
           sat.state = transition.target;
           sat.lastCheck = new Date().toISOString();
 
-switch (command) {
+          switch (command) {
             case 'initialize':
               sat.lastMessage = 'Configuration attached in payload';
               sat.lastResponse = 'SUCCESS';
@@ -66,7 +64,7 @@ switch (command) {
       });
     },
 
-sendSatelliteCommand(state, action) {
+    sendSatelliteCommand(state, action) {
       const { satelliteId, command } = action.payload;
       const sat = state.items.find(s => s.id === satelliteId);
       if (!sat) return;
@@ -91,7 +89,7 @@ sendSatelliteCommand(state, action) {
       }
     },
 
-triggerError(state, action) {
+    triggerError(state, action) {
       const sat = state.items.find(s => s.id === action.payload);
       if (sat) {
         sat.state = STATES.ERROR;
@@ -120,11 +118,61 @@ triggerError(state, action) {
         sat.lastResponse = 'SUCCESS';
       });
     },
+
+    setConstellationName(state, action) {
+      state.constellationName = action.payload;
+    },
+
+    // --- WebSocket event reducers ---
+
+    satellitesReceived(state, action) {
+      // Replace the satellite list with the server snapshot, mapping each
+      // server-side field to the shape the UI components expect.
+      state.items = action.payload.map(s => ({
+        id: s.id,
+        type: s.type,
+        name: s.name,
+        state: s.state,
+        lastMessage: s.lastMessage || '',
+        heartbeat: 3000,
+        lives: s.lives ?? 3,
+        role: s.role || 'DYNAMIC',
+        connectionUri: s.connectionUri || '',
+        lastHeartbeat: s.lastHeartbeat || new Date().toISOString(),
+        lastCheck: s.lastChanged || new Date().toISOString(),
+        lastResponse: s.lastResponse || '',
+        md5HostId: '',
+        version: s.version || '0.7',
+        commands: [],
+      }));
+    },
+
+    satelliteStateUpdated(state, action) {
+      const { id, state: newState, lives } = action.payload;
+      const sat = state.items.find(s => s.id === id);
+      if (sat) {
+        sat.state = newState;
+        if (lives !== undefined) sat.lives = lives;
+        sat.lastHeartbeat = new Date().toISOString();
+      }
+    },
+
+    commandResultReceived(state, action) {
+      const { satellite, verb, msg } = action.payload;
+      if (!satellite) return;
+      const sat = state.items.find(s => s.id === satellite);
+      if (sat) {
+        sat.lastMessage = msg || '';
+        sat.lastResponse = verb;
+        sat.lastCheck = new Date().toISOString();
+      }
+    },
   },
 });
 
 export const {
   setConfigFile,
+  setConstellationName,
   sendGlobalCommand,
   completeTransition,
   sendSatelliteCommand,
@@ -133,6 +181,9 @@ export const {
   updateHeartbeats,
   selectSatellite,
   shutdownAll,
+  satellitesReceived,
+  satelliteStateUpdated,
+  commandResultReceived,
 } = satelliteSlice.actions;
 
 export default satelliteSlice.reducer;
