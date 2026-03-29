@@ -7,9 +7,10 @@ Usage:
     python run.py --group myexp --port 8000
 
 Requires the ConstellationDAQ Python package (constellationdaq>=0.7).
-Run with the venv that has it installed:
+Activate the project venv first:
 
-    ~/repos/constellation/.venv/bin/python run.py --group demo
+    source ~/repos/constellation-assignment/.venv/bin/activate
+    python run.py --group demo
 """
 
 import argparse

@@ -4,15 +4,18 @@ version = "0.1.0"
 description = "WebSocket bridge between browsers and a Constellation DAQ network"
 requires-python = ">=3.11"
 dependencies = [
+    "ConstellationDAQ[cli]>=0.7",
     "fastapi>=0.115",
     "uvicorn[standard]>=0.30",
     "pydantic-settings>=2.0",
     "websockets>=12.0",
 ]
 
-# ConstellationDAQ is installed in ~/repos/constellation/.venv (constellationdaq>=0.7).
-# Run the bridge with that venv:
-#   ~/repos/constellation/.venv/bin/python run.py --group demo
+# Setup (one time):
+#   cd constellation-assignment
+#   python3 -m venv .venv
+#   source .venv/bin/activate
+#   pip install -e assignment/backend/
 
 [build-system]
 requires = ["setuptools"]
