@@ -8,15 +8,12 @@ A browser-based control and monitoring interface for Constellation, the autonomo
     <source src="https://raw.githubusercontent.com/priyanshuharshbodhi1/constellation-assignment/main/public/demo_video.webm" type="video/webm">
     Your browser does not support the video tag.
   </video>
-<<<<<<< HEAD
   <p><a href="https://raw.githubusercontent.com/priyanshuharshbodhi1/constellation-assignment/main/public/demo_video.mp4">Download or watch the demo video here if the player doesn't load.</a></p>
 </div>
-=======
 </div> -->
 ## 🎥 Demo Video
 
 ▶️ [Watch the 2 min Demo Video by clicking here](https://youtu.be/Bz5PRt5BP_E)
->>>>>>> 11a7040ca826ff6e30917fc7543d0e877583682d
 
 ## Features
 

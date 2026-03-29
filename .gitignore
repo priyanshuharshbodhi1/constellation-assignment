@@ -34,3 +34,8 @@ constellation/
 __pycache__/
 *.pyc
 *.pyo
+
+
+/proposal
+
+.claude
