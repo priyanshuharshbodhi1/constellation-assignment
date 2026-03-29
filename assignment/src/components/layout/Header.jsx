@@ -9,16 +9,36 @@ function formatDuration(seconds) {
   return `${h}:${m}:${s}`;
 }
 
+// Priority order for "lowest state wins" when mixed — matches Qt behaviour.
+const STATE_PRIORITY = {
+  [STATES.NEW]: 0,
+  [STATES.INIT]: 1,
+  [STATES.ORBIT]: 2,
+  [STATES.RUN]: 3,
+  [STATES.ERROR]: -1,
+  [STATES.SAFE]: -1,
+};
+
+// Returns { state, mixed } where mixed=true shows ≊ in the UI (Qt style).
 function deriveGlobalState(satellites) {
-  if (satellites.length === 0) return STATES.NEW;
-  const states = satellites.map(s => s.state);
-  if (states.every(s => s === STATES.RUN)) return STATES.RUN;
-  if (states.every(s => s === STATES.ORBIT)) return STATES.ORBIT;
-  if (states.every(s => s === STATES.INIT)) return STATES.INIT;
-  if (states.every(s => s === STATES.NEW)) return STATES.NEW;
-  if (states.some(s => s === STATES.ERROR)) return STATES.ERROR;
-  // Mixed or transitional
-  return states.find(s => typeof s === 'string' && !Object.values(STATES).includes(s)) || states[0];
+  if (satellites.length === 0) return { state: STATES.NEW, mixed: false };
+
+  const stableValues = new Set(Object.values(STATES));
+  const stableStates = satellites.map(s => s.state).filter(s => stableValues.has(s));
+
+  // If any are in ERROR/SAFE, report that regardless of others
+  if (stableStates.some(s => s === STATES.ERROR || s === STATES.SAFE)) {
+    const allError = stableStates.every(s => s === STATES.ERROR || s === STATES.SAFE);
+    return { state: STATES.ERROR, mixed: !allError };
+  }
+
+  // Find the lowest stable state across all satellites
+  const lowestPriority = Math.min(...stableStates.map(s => STATE_PRIORITY[s] ?? 0));
+  const lowestState = Object.entries(STATE_PRIORITY).find(([, v]) => v === lowestPriority)?.[0] ?? STATES.NEW;
+
+  // mixed = not all satellites are in the same state (includes satellites still transitioning)
+  const allSame = satellites.every(s => s.state === lowestState);
+  return { state: lowestState, mixed: !allSame };
 }
 
 export default function Header({ theme, onToggleTheme }) {
@@ -27,7 +47,7 @@ export default function Header({ theme, onToggleTheme }) {
   const run = useSelector(s => s.run);
   const connection = useSelector(s => s.connection);
 
-  const globalState = deriveGlobalState(satellites);
+  const { state: globalState, mixed } = deriveGlobalState(satellites);
   const runIdDisplay = run.isRunning
     ? `${run.identifier}_${run.sequence}`
     : `${run.identifier}_${run.sequence} (next)`;
@@ -59,7 +79,9 @@ export default function Header({ theme, onToggleTheme }) {
         </div>
         <div className={styles.field}>
           <span className={styles.label}>State</span>
-          <span className={`${styles.value} ${styles[stateClass]}`}>{globalState}</span>
+          <span className={`${styles.value} ${styles[stateClass]}`}>
+            {globalState}{mixed && ' \u2248'}
+          </span>
         </div>
         <div className={styles.field}>
           <span className={styles.label}>Run Identifier</span>

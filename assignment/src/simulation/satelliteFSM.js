@@ -31,6 +31,7 @@ const TRANSITION_MAP = {
   start: { transitional: TRANSITIONAL.starting, target: STATES.RUN },
   stop: { transitional: TRANSITIONAL.stopping, target: STATES.ORBIT },
   land: { transitional: TRANSITIONAL.landing, target: STATES.INIT },
+  shutdown: { transitional: TRANSITIONAL.interrupting, target: STATES.NEW },
 };
 
 export function getTransition(command) {
@@ -57,7 +58,7 @@ export const SATELLITE_PRESETS = [
   { type: 'EudaqNativeWriter', name: 'Receiver', role: 'DYNAMIC' },
 ];
 
-const COMMANDS = [
+export const COMMANDS = [
   { name: 'get_commands', desc: 'Get commands supported by satellite (returned in payload as flat MessagePack dict with strings as keys)' },
   { name: 'get_config', desc: 'Get config of satellite (returned in payload as flat MessagePack dict with strings as keys)' },
   { name: 'get_name', desc: 'Get canonical name of satellite' },

@@ -11,6 +11,8 @@
 
 import wsService from '../services/websocket';
 
+const FSM_CMDS = new Set(['initialize', 'launch', 'land', 'start', 'stop', 'shutdown']);
+
 // Build the correct payload for each Constellation command.
 // initialize → config dict (empty is valid for demo satellites)
 // start      → run identifier string  e.g. "run_0"
@@ -20,7 +22,7 @@ function _commandPayload(command, run) {
   if (command === 'start') return `${run.identifier}_${run.sequence}`;
   return undefined;
 }
-import { satellitesReceived, satelliteStateUpdated, commandResultReceived, setConstellationName } from './satelliteSlice';
+import { satellitesReceived, satelliteStateUpdated, commandResultReceived, setConstellationName, setQueryResult } from './satelliteSlice';
 import { wsLogReceived } from './logSlice';
 import { startRun, stopRun } from './runSlice';
 
@@ -57,12 +59,19 @@ const websocketMiddleware = store => next => action => {
 
       case 'command_result':
         store.dispatch(commandResultReceived(msg));
-        // Keep the run slice in sync when start/stop commands succeed
         if (msg.command === 'start' && msg.verb === 'SUCCESS') {
           store.dispatch(startRun());
         }
         if (msg.command === 'stop' && msg.verb === 'SUCCESS') {
           store.dispatch(stopRun());
+        }
+        // Show modal for query commands (non-FSM)
+        if (msg.msg && !FSM_CMDS.has(msg.command)) {
+          store.dispatch(setQueryResult({
+            satelliteId: msg.satellite,
+            command: msg.command,
+            result: msg.msg,
+          }));
         }
         break;
 
@@ -83,7 +92,9 @@ const websocketMiddleware = store => next => action => {
       const { run } = store.getState();
       const payload = _commandPayload(command, run);
       wsService.send({ type: 'global_command', command, payload });
-      return;
+      // Fall through so the reducer applies optimistic transitional states,
+      // giving immediate visual feedback. The server's satellite_list response
+      // will override with the real final state when it arrives.
     }
 
     if (action.type === 'satellites/sendSatelliteCommand') {
@@ -91,7 +102,7 @@ const websocketMiddleware = store => next => action => {
       const { run } = store.getState();
       const payload = _commandPayload(command, run);
       wsService.send({ type: 'command', satellite: satelliteId, command, payload });
-      return;
+      // Fall through for same reason as sendGlobalCommand above.
     }
 
     if (action.type === 'logs/setSubscriptionLevel') {

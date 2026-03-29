@@ -5,6 +5,20 @@
   overflow: hidden;
 }
 
+/* Main content area: log stream + subscriptions sidebar */
+.body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.logArea {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
 .toolbar {
   display: flex;
   justify-content: space-between;
@@ -245,4 +259,96 @@
   font-family: var(--font-mono);
   font-size: 0.78rem;
   word-break: break-all;
+}
+
+/* Subscriptions sidebar */
+.subsPanel {
+  width: 270px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--border);
+  background: var(--bg-secondary);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.subsPanelSection {
+  padding: 12px 12px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.subsPanelTitle {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.globalSubRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.subsLabel {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.subsSelect {
+  font-size: 0.75rem;
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  cursor: pointer;
+  max-width: 110px;
+}
+
+.subsSelect:focus {
+  outline: 1px solid var(--accent);
+}
+
+/* Level badge colors on the select */
+.badgeGlobal { color: var(--text-muted); }
+.badgeTrace   { color: var(--log-trace); border-color: var(--log-trace); }
+.badgeDebug   { color: var(--log-debug); border-color: var(--log-debug); }
+.badgeInfo    { color: var(--log-info);  border-color: var(--log-info); }
+.badgeStatus  { color: var(--log-status); border-color: var(--log-status); }
+.badgeWarning { color: var(--log-warning); border-color: var(--log-warning); }
+.badgeCritical{ color: var(--log-critical); border-color: var(--log-critical); }
+
+.indivSubsList {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.indivSubRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.indivSatName {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-mono);
+}
+
+.subsEmpty {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
 }

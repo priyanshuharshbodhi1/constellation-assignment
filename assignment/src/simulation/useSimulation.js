@@ -15,14 +15,17 @@ export function useSimulation() {
   const satellites = useSelector(s => s.satellites.items);
   const isRunning = useSelector(s => s.run.isRunning);
   const subLevel = useSelector(s => s.logs.subscriptionLevel);
+  const individualSubs = useSelector(s => s.logs.individualSubscriptions);
   const satellitesRef = useRef(satellites);
   const isRunningRef = useRef(isRunning);
   const subLevelRef = useRef(subLevel);
+  const individualSubsRef = useRef(individualSubs);
 
   // Keep refs in sync without causing re-subscriptions
   useEffect(() => { satellitesRef.current = satellites; }, [satellites]);
   useEffect(() => { isRunningRef.current = isRunning; }, [isRunning]);
   useEffect(() => { subLevelRef.current = subLevel; }, [subLevel]);
+  useEffect(() => { individualSubsRef.current = individualSubs; }, [individualSubs]);
 
   useEffect(() => {
     if (mode !== 'simulation') return;
@@ -40,8 +43,13 @@ export function useSimulation() {
 
       logTimeout = setTimeout(() => {
         const entry = generateLogEntry(satellitesRef.current);
-        const minPriority = LEVEL_PRIORITY[subLevelRef.current] || 0;
-        if (LEVEL_PRIORITY[entry.level] >= minPriority) {
+        const globalPriority = LEVEL_PRIORITY[subLevelRef.current] ?? 0;
+        const individualLevel = individualSubsRef.current[entry.sender];
+        // Individual subs can only increase verbosity (lower threshold), not decrease it
+        const effectivePriority = individualLevel != null
+          ? Math.min(globalPriority, LEVEL_PRIORITY[individualLevel] ?? globalPriority)
+          : globalPriority;
+        if (LEVEL_PRIORITY[entry.level] >= effectivePriority) {
           dispatch(addLogEntry(entry));
         }
         scheduleLog();

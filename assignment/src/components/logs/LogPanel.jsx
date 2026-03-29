@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   setSubscriptionLevel,
+  setIndividualSubscription,
   setFilter,
   resetFilters,
   clearLogs,
@@ -53,9 +54,69 @@ function LogDetailModal({ entry, onClose }) {
   );
 }
 
+const LEVEL_BADGE_CLASS = {
+  TRACE: styles.badgeTrace,
+  DEBUG: styles.badgeDebug,
+  INFO: styles.badgeInfo,
+  STATUS: styles.badgeStatus,
+  WARNING: styles.badgeWarning,
+  CRITICAL: styles.badgeCritical,
+};
+
+function SubscriptionsPanel({ satellites, subscriptionLevel, individualSubscriptions }) {
+  const dispatch = useDispatch();
+
+  return (
+    <div className={styles.subsPanel}>
+      <div className={styles.subsPanelSection}>
+        <div className={styles.subsPanelTitle}>Global Subscriptions</div>
+        <div className={styles.globalSubRow}>
+          <span className={styles.subsLabel}>Global Level</span>
+          <select
+            className={`${styles.subsSelect} ${LEVEL_BADGE_CLASS[subscriptionLevel] || ''}`}
+            value={subscriptionLevel}
+            onChange={e => dispatch(setSubscriptionLevel(e.target.value))}
+          >
+            {LOG_LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
+          </select>
+        </div>
+      </div>
+
+      <div className={styles.subsPanelSection}>
+        <div className={styles.subsPanelTitle}>Individual Subscriptions</div>
+        {satellites.length === 0 ? (
+          <div className={styles.subsEmpty}>No satellites connected</div>
+        ) : (
+          <div className={styles.indivSubsList}>
+            {satellites.map(sat => {
+              const current = individualSubscriptions[sat.id] ?? null;
+              return (
+                <div key={sat.id} className={styles.indivSubRow}>
+                  <span className={styles.indivSatName} title={sat.id}>{sat.id}</span>
+                  <select
+                    className={`${styles.subsSelect} ${current ? (LEVEL_BADGE_CLASS[current] || '') : styles.badgeGlobal}`}
+                    value={current ?? ''}
+                    onChange={e => dispatch(setIndividualSubscription({
+                      satelliteId: sat.id,
+                      level: e.target.value || null,
+                    }))}
+                  >
+                    <option value="">- global -</option>
+                    {LOG_LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
+                  </select>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function LogPanel() {
   const dispatch = useDispatch();
-  const { entries, subscriptionLevel, filters, paused } = useSelector(s => s.logs);
+  const { entries, subscriptionLevel, individualSubscriptions, filters, paused } = useSelector(s => s.logs);
   const satellites = useSelector(s => s.satellites.items);
   const listRef = useRef(null);
   const autoScrollRef = useRef(true);
@@ -128,16 +189,6 @@ export default function LogPanel() {
         </div>
 
         <div className={styles.toolbarRight}>
-          <div className={styles.filterItem}>
-            <label>Subscribe</label>
-            <select
-              value={subscriptionLevel}
-              onChange={e => dispatch(setSubscriptionLevel(e.target.value))}
-            >
-              {LOG_LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
-            </select>
-          </div>
-
           <button
             className={`${styles.filterBtn} ${paused ? styles.pauseActive : ''}`}
             onClick={() => dispatch(togglePause())}
@@ -151,25 +202,35 @@ export default function LogPanel() {
         </div>
       </div>
 
-      <div className={styles.logList} ref={listRef} onScroll={handleScroll}>
-        {filteredEntries.length === 0 ? (
-          <div className={styles.emptyState}>
-            {entries.length === 0 ? 'Waiting for log messages...' : 'No messages match current filters'}
+      <div className={styles.body}>
+        <div className={styles.logArea}>
+          <div className={styles.logList} ref={listRef} onScroll={handleScroll}>
+            {filteredEntries.length === 0 ? (
+              <div className={styles.emptyState}>
+                {entries.length === 0 ? 'Waiting for log messages...' : 'No messages match current filters'}
+              </div>
+            ) : (
+              filteredEntries.map(entry => (
+                <LogEntry key={entry.id} entry={entry} onDoubleClick={setDetailEntry} />
+              ))
+            )}
           </div>
-        ) : (
-          filteredEntries.map(entry => (
-            <LogEntry key={entry.id} entry={entry} onDoubleClick={setDetailEntry} />
-          ))
-        )}
-      </div>
 
-      <div className={styles.statusBar}>
-        <span>
-          {filteredEntries.length !== entries.length
-            ? `Showing ${filteredEntries.length} of ${entries.length}`
-            : `${entries.length} messages`}
-        </span>
-        {paused && <span className={styles.pauseBadge}>PAUSED</span>}
+          <div className={styles.statusBar}>
+            <span>
+              {filteredEntries.length !== entries.length
+                ? `Showing ${filteredEntries.length} of ${entries.length}`
+                : `${entries.length} messages`}
+            </span>
+            {paused && <span className={styles.pauseBadge}>PAUSED</span>}
+          </div>
+        </div>
+
+        <SubscriptionsPanel
+          satellites={satellites}
+          subscriptionLevel={subscriptionLevel}
+          individualSubscriptions={individualSubscriptions}
+        />
       </div>
 
       <LogDetailModal entry={detailEntry} onClose={() => setDetailEntry(null)} />

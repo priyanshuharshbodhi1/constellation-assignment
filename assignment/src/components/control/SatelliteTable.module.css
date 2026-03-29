@@ -97,6 +97,15 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
+}
+
+.msgText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
 }
 
 .msgDot {
@@ -178,3 +187,83 @@
 .menuDot[data-cmd="start"] { background: var(--state-run); }
 .menuDot[data-cmd="stop"] { background: var(--text-muted); }
 .menuDot[data-cmd="shutdown"] { background: var(--text-muted); }
+
+/* Widen Last message column */
+.table th.msgHeader,
+.table td.msgCell {
+  width: 40%;
+  min-width: 200px;
+}
+
+/* Query result modal */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 200;
+}
+
+.queryModal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 201;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  min-width: 400px;
+  max-width: 580px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+}
+
+.queryModalHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.queryModalCmd {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.queryModalSat {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  flex: 1;
+}
+
+.queryModalClose {
+  background: none;
+  color: var(--text-secondary);
+  font-size: 1.3rem;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.queryModalClose:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.queryModalBody {
+  padding: 14px 16px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 300px;
+  overflow-y: auto;
+  background: var(--bg-tertiary);
+  margin: 0;
+  border-radius: 0 0 var(--radius) var(--radius);
+  line-height: 1.6;
+}

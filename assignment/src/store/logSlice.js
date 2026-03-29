@@ -7,6 +7,7 @@ const logSlice = createSlice({
   initialState: {
     entries: [],
     subscriptionLevel: 'INFO',
+    individualSubscriptions: {}, // satellite id -> level, absent = use global
     filters: {
       level: '',
       sender: '',
@@ -26,6 +27,15 @@ const logSlice = createSlice({
 
     setSubscriptionLevel(state, action) {
       state.subscriptionLevel = action.payload;
+    },
+
+    setIndividualSubscription(state, action) {
+      const { satelliteId, level } = action.payload;
+      if (level === null) {
+        delete state.individualSubscriptions[satelliteId];
+      } else {
+        state.individualSubscriptions[satelliteId] = level;
+      }
     },
 
     setFilter(state, action) {
@@ -67,6 +77,7 @@ const logSlice = createSlice({
 export const {
   addLogEntry,
   setSubscriptionLevel,
+  setIndividualSubscription,
   setFilter,
   resetFilters,
   clearLogs,

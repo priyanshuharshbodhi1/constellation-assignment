@@ -8,7 +8,9 @@ import {
   selectSatellite,
 } from '../../store/satelliteSlice';
 import { startRun, stopRun, setRunIdentifier, setSequence } from '../../store/runSlice';
+import { setSubscriptionLevel } from '../../store/logSlice';
 import { ALLOWED_TRANSITIONS } from '../../simulation/satelliteFSM';
+import { LOG_LEVELS } from '../../simulation/logGenerator';
 import SatelliteTable from './SatelliteTable';
 import SatelliteDetail from './SatelliteDetail';
 import ConfigEditor from './ConfigEditor';
@@ -45,6 +47,7 @@ export default function ControlPanel() {
   const configFile = useSelector(s => s.satellites.configFile);
   const selectedId = useSelector(s => s.satellites.selectedSatelliteId);
   const run = useSelector(s => s.run);
+  const subscriptionLevel = useSelector(s => s.logs.subscriptionLevel);
   const mode = useSelector(s => s.connection.mode);
   const [transitioning, setTransitioning] = useState(false);
   const [configContent, setConfigContent] = useState('');
@@ -62,13 +65,10 @@ export default function ControlPanel() {
     if (!canSend(command)) return;
 
     if (mode === 'live') {
-      // Middleware intercepts this and sends it over WebSocket.
-      // State changes come back as satellite_list / state_update events.
       dispatch(sendGlobalCommand(command));
       return;
     }
 
-    // Simulation mode: drive the local FSM.
     setTransitioning(true);
     if (command === 'start') dispatch(startRun());
     else if (command === 'stop') dispatch(stopRun());
@@ -80,15 +80,11 @@ export default function ControlPanel() {
   }, [dispatch, canSend, mode]);
 
   const handleShutdown = () => {
-    if (run.isRunning) {
-      dispatch(stopRun());
-    }
+    if (run.isRunning) dispatch(stopRun());
     dispatch(shutdownAll());
   };
 
-  const handleSelectConfig = () => {
-    fileInputRef.current?.click();
-  };
+  const handleSelectConfig = () => fileInputRef.current?.click();
 
   const handleFileSelected = (e) => {
     const file = e.target.files?.[0];
@@ -108,15 +104,18 @@ export default function ControlPanel() {
     dispatch(setConfigFile('config_deduced.toml'));
   };
 
-  const selectedSat = selectedId
-    ? satellites.find(s => s.id === selectedId)
-    : null;
+  const selectedSat = selectedId ? satellites.find(s => s.id === selectedId) : null;
 
   return (
     <div className={styles.panel}>
       <div className={styles.main}>
+
+        {/* ── Configuration + Control ────────────────────────────────── */}
         <div className={styles.toolbar}>
+
           <div className={styles.configSection}>
+            <div className={styles.sectionLabel}>Configuration</div>
+
             <div className={styles.configRow}>
               <label>Configuration:</label>
               <input
@@ -124,10 +123,10 @@ export default function ControlPanel() {
                 value={configFile}
                 readOnly
                 placeholder="Configuration file not set"
-                className={styles.configInput}
+                className={`${styles.configInput} ${!configFile ? styles.configInputEmpty : ''}`}
               />
               <button className={styles.btn} onClick={handleSelectConfig}>Select</button>
-              <button className={styles.btn} onClick={handleDeduce}>Deduce</button>
+              <button className={styles.btn} onClick={handleDeduce} disabled={satellites.length === 0}>Deduce</button>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -136,6 +135,25 @@ export default function ControlPanel() {
                 style={{ display: 'none' }}
               />
             </div>
+
+            <div className={styles.configRow}>
+              <label>Log:</label>
+              <input
+                type="text"
+                readOnly
+                placeholder="(log path)"
+                className={styles.configInput}
+              />
+              <select
+                value={subscriptionLevel}
+                onChange={e => dispatch(setSubscriptionLevel(e.target.value))}
+                className={styles.logLevelSelect}
+              >
+                {LOG_LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
+              </select>
+              <button className={styles.btn}>Log</button>
+            </div>
+
             <div className={styles.configRow}>
               <label>Run Identifier:</label>
               <input
@@ -156,6 +174,7 @@ export default function ControlPanel() {
           </div>
 
           <div className={styles.controlButtons}>
+            <div className={styles.sectionLabel}>Control</div>
             <div className={styles.btnRow}>
               <button
                 className={`${styles.cmdBtn} ${styles.initBtn}`}

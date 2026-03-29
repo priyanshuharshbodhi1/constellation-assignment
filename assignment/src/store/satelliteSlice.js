@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { STATES, getTransition, ALLOWED_TRANSITIONS } from '../simulation/satelliteFSM';
+import { STATES, getTransition, ALLOWED_TRANSITIONS, COMMANDS } from '../simulation/satelliteFSM';
 
 const satelliteSlice = createSlice({
   name: 'satellites',
@@ -8,6 +8,7 @@ const satelliteSlice = createSlice({
     constellationName: '',
     configFile: '',
     selectedSatelliteId: null,
+    queryResult: null, // { satelliteId, command, result } shown in modal
   },
   reducers: {
     setConfigFile(state, action) {
@@ -123,6 +124,14 @@ const satelliteSlice = createSlice({
       state.constellationName = action.payload;
     },
 
+    setQueryResult(state, action) {
+      state.queryResult = action.payload; // { satelliteId, command, result }
+    },
+
+    clearQueryResult(state) {
+      state.queryResult = null;
+    },
+
     // --- WebSocket event reducers ---
 
     satellitesReceived(state, action) {
@@ -143,7 +152,7 @@ const satelliteSlice = createSlice({
         lastResponse: s.lastResponse ?? '',
         md5HostId: '',
         version: s.version || '0.7',
-        commands: [],
+        commands: s.commands ?? COMMANDS,
       }));
     },
 
@@ -173,6 +182,8 @@ const satelliteSlice = createSlice({
 export const {
   setConfigFile,
   setConstellationName,
+  setQueryResult,
+  clearQueryResult,
   sendGlobalCommand,
   completeTransition,
   sendSatelliteCommand,
