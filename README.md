@@ -4,7 +4,7 @@ A browser-based control and monitoring interface for [Constellation](https://con
 
 ## Demo Video
 
-[Watch the 2 min Demo Video](https://youtu.be/Bz5PRt5BP_E)
+[Watch the New Demo Video with WebSocket implemented partially](https://youtu.be/thmsrLCyLqM)
 
 ## Architecture
 
