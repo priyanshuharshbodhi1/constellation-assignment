@@ -1,28 +1,10 @@
 import { useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { STATES, ALLOWED_TRANSITIONS, getTransition } from '../../simulation/satelliteFSM';
+import { STATES, ALLOWED_TRANSITIONS } from '../../simulation/satelliteFSM';
 import {
   sendSatelliteCommand,
-  completeSatelliteTransition,
-  setQueryResult,
   clearQueryResult,
 } from '../../store/satelliteSlice';
-
-const FSM_CMDS = new Set(['initialize', 'launch', 'land', 'start', 'stop', 'shutdown']);
-
-function simulateQueryResponse(cmd, satellite, run) {
-  switch (cmd) {
-    case 'get_name':    return satellite.id;
-    case 'get_version': return `v${satellite.version || '0.7'} (Reticulum)`;
-    case 'get_state':   return satellite.state;
-    case 'get_role':    return satellite.role;
-    case 'get_status':  return `${satellite.id} is operational`;
-    case 'get_run_id':  return run?.identifier ? `${run.identifier}_${run.sequence}` : 'N/A';
-    case 'get_config':  return `[${satellite.id}]\nconnection_uri = "${satellite.connectionUri}"\nheartbeat = ${satellite.heartbeat}`;
-    case 'get_commands': return satellite.commands?.map(c => c.name).join(', ') || 'N/A';
-    default: return `Response for ${cmd}`;
-  }
-}
 
 function QueryResultModal({ result, onClose }) {
   if (!result) return null;
@@ -53,8 +35,6 @@ const STATE_DOT_CLASS = {
 
 function ContextMenu({ satellite, position, onClose }) {
   const dispatch = useDispatch();
-  const run = useSelector(s => s.run);
-  const mode = useSelector(s => s.connection.mode);
 
   const commands = [
     { name: 'initialize', type: 'transition' },
@@ -76,20 +56,7 @@ function ContextMenu({ satellite, position, onClose }) {
 
   const handleCommand = (cmd) => {
     dispatch(sendSatelliteCommand({ satelliteId: satellite.id, command: cmd.name }));
-    const transition = getTransition(cmd.name);
-    // Only complete transitions client-side in simulation mode;
-    // in live mode the server response drives the final state.
-    if (transition && mode !== 'live') {
-      setTimeout(() => {
-        dispatch(completeSatelliteTransition({ satelliteId: satellite.id, command: cmd.name }));
-      }, 600);
-    }
-    // For query commands in simulation mode, show response modal immediately
-    if (!FSM_CMDS.has(cmd.name) && mode !== 'live') {
-      const result = simulateQueryResponse(cmd.name, satellite, run);
-      dispatch(setQueryResult({ satelliteId: satellite.id, command: cmd.name, result }));
-    }
-    // In live mode the WS response triggers setQueryResult via middleware
+    // Server response drives state transitions and query result modals
     onClose();
   };
 

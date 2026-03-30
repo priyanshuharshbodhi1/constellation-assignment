@@ -1,5 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { STATES, getTransition, ALLOWED_TRANSITIONS, COMMANDS } from '../simulation/satelliteFSM';
+import { STATES, TRANSITIONAL, getTransition, ALLOWED_TRANSITIONS, COMMANDS } from '../simulation/satelliteFSM';
+
+const STABLE_STATES = new Set(Object.values(STATES));
+const TRANSITIONAL_STATES = new Set(Object.values(TRANSITIONAL));
 
 const satelliteSlice = createSlice({
   name: 'satellites',
@@ -164,9 +167,15 @@ const satelliteSlice = createSlice({
       const { id, state: newState, lives } = action.payload;
       const sat = state.items.find(s => s.id === id);
       if (sat) {
+        const wasTransitioning = TRANSITIONAL_STATES.has(sat.state);
         sat.state = newState;
         if (lives !== undefined) sat.lives = lives;
         sat.lastHeartbeat = new Date().toISOString();
+        // When a satellite finishes transitioning into a stable state,
+        // update lastMessage so it doesn't stay stuck on "transitioning".
+        if (wasTransitioning && STABLE_STATES.has(newState)) {
+          sat.lastMessage = newState;
+        }
       }
     },
 
@@ -175,7 +184,10 @@ const satelliteSlice = createSlice({
       if (!satellite) return;
       const sat = state.items.find(s => s.id === satellite);
       if (sat) {
-        sat.lastMessage = msg || '';
+        // Only update lastMessage if the server sent a non-empty msg;
+        // otherwise keep the current value (e.g. "transitioning") and let
+        // satelliteStateUpdated replace it when the transition completes.
+        if (msg) sat.lastMessage = msg;
         sat.lastResponse = verb;
         sat.lastCheck = new Date().toISOString();
       }

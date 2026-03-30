@@ -8,8 +8,7 @@ import {
   clearLogs,
   togglePause,
 } from '../../store/logSlice';
-import { LOG_LEVELS } from '../../simulation/logGenerator';
-
+const LOG_LEVELS = ['TRACE', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL', 'STATUS'];
 const LEVEL_ORDER = Object.fromEntries(LOG_LEVELS.map((l, i) => [l, i]));
 import styles from './LogPanel.module.css';
 

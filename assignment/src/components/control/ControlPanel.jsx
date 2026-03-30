@@ -2,21 +2,19 @@ import { useState, useCallback, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   sendGlobalCommand,
-  completeTransition,
   setConfigFile,
   shutdownAll,
   selectSatellite,
 } from '../../store/satelliteSlice';
-import { startRun, stopRun, setRunIdentifier, setSequence } from '../../store/runSlice';
+import { setRunIdentifier, setSequence } from '../../store/runSlice';
 import { setSubscriptionLevel } from '../../store/logSlice';
 import { ALLOWED_TRANSITIONS } from '../../simulation/satelliteFSM';
-import { LOG_LEVELS } from '../../simulation/logGenerator';
 import SatelliteTable from './SatelliteTable';
 import SatelliteDetail from './SatelliteDetail';
 import ConfigEditor from './ConfigEditor';
 import styles from './ControlPanel.module.css';
 
-const TRANSITION_DELAY = 800;
+const LOG_LEVELS = ['TRACE', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL', 'STATUS'];
 
 function deduceConfig(satellites) {
   return satellites.map(sat => {
@@ -48,40 +46,23 @@ export default function ControlPanel() {
   const selectedId = useSelector(s => s.satellites.selectedSatelliteId);
   const run = useSelector(s => s.run);
   const subscriptionLevel = useSelector(s => s.logs.subscriptionLevel);
-  const mode = useSelector(s => s.connection.mode);
-  const [transitioning, setTransitioning] = useState(false);
   const [configContent, setConfigContent] = useState('');
   const fileInputRef = useRef(null);
 
   const canSend = useCallback((command) => {
-    if (transitioning) return false;
     return satellites.some(sat => {
       const allowed = ALLOWED_TRANSITIONS[sat.state] || [];
       return allowed.includes(command);
     });
-  }, [satellites, transitioning]);
+  }, [satellites]);
 
   const handleGlobalCommand = useCallback((command) => {
     if (!canSend(command)) return;
-
-    if (mode === 'live') {
-      dispatch(sendGlobalCommand(command));
-      return;
-    }
-
-    setTransitioning(true);
-    if (command === 'start') dispatch(startRun());
-    else if (command === 'stop') dispatch(stopRun());
     dispatch(sendGlobalCommand(command));
-    setTimeout(() => {
-      dispatch(completeTransition({ command }));
-      setTransitioning(false);
-    }, TRANSITION_DELAY);
-  }, [dispatch, canSend, mode]);
+  }, [dispatch, canSend]);
 
   const handleShutdown = () => {
-    if (run.isRunning) dispatch(stopRun());
-    dispatch(shutdownAll());
+    dispatch(sendGlobalCommand('shutdown'));
   };
 
   const handleSelectConfig = () => fileInputRef.current?.click();

@@ -1,6 +1,6 @@
 import { useDispatch } from 'react-redux';
-import { sendSatelliteCommand, completeSatelliteTransition } from '../../store/satelliteSlice';
-import { getTransition, ALLOWED_TRANSITIONS } from '../../simulation/satelliteFSM';
+import { sendSatelliteCommand } from '../../store/satelliteSlice';
+import { ALLOWED_TRANSITIONS } from '../../simulation/satelliteFSM';
 import styles from './SatelliteDetail.module.css';
 
 const FSM_COMMANDS = new Set(['initialize', 'launch', 'land', 'start', 'stop', 'shutdown']);
@@ -27,12 +27,6 @@ export default function SatelliteDetail({ satellite, onClose }) {
 
   const handleCmd = (cmdName) => {
     dispatch(sendSatelliteCommand({ satelliteId: satellite.id, command: cmdName }));
-    const transition = getTransition(cmdName);
-    if (transition) {
-      setTimeout(() => {
-        dispatch(completeSatelliteTransition({ satelliteId: satellite.id, command: cmdName }));
-      }, 600);
-    }
   };
 
   return (

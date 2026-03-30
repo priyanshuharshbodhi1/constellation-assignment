@@ -59,18 +59,27 @@ const websocketMiddleware = store => next => action => {
 
       case 'command_result':
         store.dispatch(commandResultReceived(msg));
-        if (msg.command === 'start' && msg.verb === 'SUCCESS') {
+        // Only toggle run state once (not per-satellite result)
+        if (msg.command === 'start' && msg.verb === 'SUCCESS' && !store.getState().run.isRunning) {
           store.dispatch(startRun());
         }
-        if (msg.command === 'stop' && msg.verb === 'SUCCESS') {
+        if (msg.command === 'stop' && msg.verb === 'SUCCESS' && store.getState().run.isRunning) {
           store.dispatch(stopRun());
         }
         // Show modal for query commands (non-FSM)
-        if (msg.msg && !FSM_CMDS.has(msg.command)) {
+        if (!FSM_CMDS.has(msg.command) && (msg.msg || msg.payload != null)) {
+          let result = msg.msg || '';
+          // Append payload data (e.g. get_commands list, get_config dict)
+          if (msg.payload != null) {
+            const formatted = typeof msg.payload === 'object'
+              ? JSON.stringify(msg.payload, null, 2)
+              : String(msg.payload);
+            result = result ? `${result}\n\n${formatted}` : formatted;
+          }
           store.dispatch(setQueryResult({
             satelliteId: msg.satellite,
             command: msg.command,
-            result: msg.msg,
+            result,
           }));
         }
         break;
@@ -84,17 +93,17 @@ const websocketMiddleware = store => next => action => {
     return;
   }
 
-  // --- Outbound: intercept commands in live mode ---
+  // --- Outbound: send commands over WebSocket ---
 
-  if (connection.mode === 'live' && connection.status === 'connected') {
+  if (connection.status === 'connected') {
     if (action.type === 'satellites/sendGlobalCommand') {
       const command = action.payload;
       const { run } = store.getState();
       const payload = _commandPayload(command, run);
       wsService.send({ type: 'global_command', command, payload });
       // Fall through so the reducer applies optimistic transitional states,
-      // giving immediate visual feedback. The server's satellite_list response
-      // will override with the real final state when it arrives.
+      // giving immediate visual feedback. The server's response will
+      // override with the real final state when it arrives.
     }
 
     if (action.type === 'satellites/sendSatelliteCommand') {
@@ -102,12 +111,10 @@ const websocketMiddleware = store => next => action => {
       const { run } = store.getState();
       const payload = _commandPayload(command, run);
       wsService.send({ type: 'command', satellite: satelliteId, command, payload });
-      // Fall through for same reason as sendGlobalCommand above.
     }
 
     if (action.type === 'logs/setSubscriptionLevel') {
       wsService.send({ type: 'subscribe_logs', min_level: action.payload });
-      // Fall through so the local Redux state is also updated
     }
   }
 

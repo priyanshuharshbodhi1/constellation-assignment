@@ -6,6 +6,7 @@ import ControlPanel from './components/control/ControlPanel';
 import LogPanel from './components/logs/LogPanel';
 import TelemetryPanel from './components/telemetry/TelemetryPanel';
 import { connect } from './store/connectionSlice';
+import { tickTimer } from './store/runSlice';
 import styles from './App.module.css';
 
 export default function App() {
@@ -17,6 +18,12 @@ export default function App() {
 
   useEffect(() => {
     dispatch(connect());
+  }, [dispatch]);
+
+  // Run timer — tick every second so elapsed display stays current
+  useEffect(() => {
+    const id = setInterval(() => dispatch(tickTimer()), 1000);
+    return () => clearInterval(id);
   }, [dispatch]);
 
   useEffect(() => {

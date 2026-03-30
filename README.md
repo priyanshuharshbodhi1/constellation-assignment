@@ -38,7 +38,6 @@ The bridge wraps Constellation's `ScriptableController` and `MonitoringListener`
 
 ### General
 - **Live mode**: connects to real Constellation satellites through the WebSocket bridge
-- **Simulation mode**: runs entirely in the browser with mock data generators (no backend needed)
 - Dark/light theme toggle with persistent preference
 - Satellite FSM enforces the same state transitions as the real Constellation protocol
 - Optimistic UI updates: commands are sent over WebSocket AND applied locally for instant feedback; the server response overrides with the real final state
