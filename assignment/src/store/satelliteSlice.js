@@ -24,7 +24,7 @@ const satelliteSlice = createSlice({
         const allowed = ALLOWED_TRANSITIONS[sat.state] || [];
         if (allowed.includes(command)) {
           sat.state = transition.transitional;
-          sat.lastMessage = `${command} command sent`;
+          sat.lastMessage = 'transitioning';
         }
       });
     },
@@ -73,7 +73,7 @@ const satelliteSlice = createSlice({
       const transition = getTransition(command);
       if (transition) {
         sat.state = transition.transitional;
-        sat.lastMessage = `${command} command sent`;
+        sat.lastMessage = 'transitioning';
       }
     },
 
@@ -135,25 +135,29 @@ const satelliteSlice = createSlice({
     // --- WebSocket event reducers ---
 
     satellitesReceived(state, action) {
-      // Replace the satellite list with the server snapshot, mapping each
-      // server-side field to the shape the UI components expect.
-      state.items = action.payload.map(s => ({
-        id: s.id,
-        type: s.type,
-        name: s.name,
-        state: s.state,
-        lastMessage: s.lastMessage ?? '',
-        heartbeat: 3000,
-        lives: s.lives ?? 3,
-        role: s.role ?? 'DYNAMIC',
-        connectionUri: s.connectionUri ?? '',
-        lastHeartbeat: s.lastHeartbeat ?? new Date().toISOString(),
-        lastCheck: s.lastChanged ?? new Date().toISOString(),
-        lastResponse: s.lastResponse ?? '',
-        md5HostId: '',
-        version: s.version || '0.7',
-        commands: s.commands ?? COMMANDS,
-      }));
+      // Merge the server snapshot with existing items so that fields the
+      // server doesn't track (like lastMessage from command_result) are preserved.
+      const existingById = Object.fromEntries(state.items.map(s => [s.id, s]));
+      state.items = action.payload.map(s => {
+        const existing = existingById[s.id];
+        return {
+          id: s.id,
+          type: s.type,
+          name: s.name,
+          state: s.state,
+          lastMessage: s.lastMessage ?? existing?.lastMessage ?? '',
+          heartbeat: 3000,
+          lives: s.lives ?? 3,
+          role: s.role ?? 'DYNAMIC',
+          connectionUri: s.connectionUri ?? '',
+          lastHeartbeat: s.lastHeartbeat ?? new Date().toISOString(),
+          lastCheck: s.lastChanged ?? new Date().toISOString(),
+          lastResponse: s.lastResponse ?? existing?.lastResponse ?? '',
+          md5HostId: '',
+          version: s.version || '0.7',
+          commands: s.commands ?? COMMANDS,
+        };
+      });
     },
 
     satelliteStateUpdated(state, action) {

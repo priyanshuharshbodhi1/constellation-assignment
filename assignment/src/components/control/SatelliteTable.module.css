@@ -93,6 +93,10 @@
   50% { opacity: 0.4; }
 }
 
+.msgTd {
+  /* Let the table layout algorithm size this column normally */
+}
+
 .msgCell {
   display: flex;
   align-items: center;
@@ -190,7 +194,7 @@
 
 /* Widen Last message column */
 .table th.msgHeader,
-.table td.msgCell {
+.table td.msgTd {
   width: 40%;
   min-width: 200px;
 }

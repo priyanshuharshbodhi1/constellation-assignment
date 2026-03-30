@@ -77,7 +77,9 @@ function ContextMenu({ satellite, position, onClose }) {
   const handleCommand = (cmd) => {
     dispatch(sendSatelliteCommand({ satelliteId: satellite.id, command: cmd.name }));
     const transition = getTransition(cmd.name);
-    if (transition) {
+    // Only complete transitions client-side in simulation mode;
+    // in live mode the server response drives the final state.
+    if (transition && mode !== 'live') {
       setTimeout(() => {
         dispatch(completeSatelliteTransition({ satelliteId: satellite.id, command: cmd.name }));
       }, 600);
@@ -189,9 +191,11 @@ export default function SatelliteTable({ satellites, onSelect, selectedId }) {
                       {sat.state}
                     </span>
                   </td>
-                  <td className={styles.msgCell}>
-                    <span className={`${styles.msgDot} ${styles[dotClass]}`} />
-                    <span className={styles.msgText}>{sat.lastMessage || '—'}</span>
+                  <td className={styles.msgTd}>
+                    <div className={styles.msgCell}>
+                      <span className={`${styles.msgDot} ${styles[dotClass]}`} />
+                      <span className={styles.msgText}>{sat.lastMessage || '—'}</span>
+                    </div>
                   </td>
                   <td className={styles.mono}>{sat.state !== STATES.NEW ? `${sat.heartbeat}ms` : ''}</td>
                   <td className={styles.mono}>{sat.state !== STATES.NEW ? sat.lives : ''}</td>
