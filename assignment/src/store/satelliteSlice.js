@@ -27,7 +27,7 @@ const satelliteSlice = createSlice({
         const allowed = ALLOWED_TRANSITIONS[sat.state] || [];
         if (allowed.includes(command)) {
           sat.state = transition.transitional;
-          sat.lastMessage = 'transitioning';
+          sat.lastMessage = `${transition.transitional}...`;
         }
       });
     },
@@ -76,7 +76,7 @@ const satelliteSlice = createSlice({
       const transition = getTransition(command);
       if (transition) {
         sat.state = transition.transitional;
-        sat.lastMessage = 'transitioning';
+        sat.lastMessage = `${transition.transitional}...`;
       }
     },
 
@@ -180,14 +180,11 @@ const satelliteSlice = createSlice({
     },
 
     commandResultReceived(state, action) {
-      const { satellite, verb, msg } = action.payload;
+      const { satellite, command, verb, msg } = action.payload;
       if (!satellite) return;
       const sat = state.items.find(s => s.id === satellite);
       if (sat) {
-        // Only update lastMessage if the server sent a non-empty msg;
-        // otherwise keep the current value (e.g. "transitioning") and let
-        // satelliteStateUpdated replace it when the transition completes.
-        if (msg) sat.lastMessage = msg;
+        sat.lastMessage = msg || `${command}: ${verb}`;
         sat.lastResponse = verb;
         sat.lastCheck = new Date().toISOString();
       }
